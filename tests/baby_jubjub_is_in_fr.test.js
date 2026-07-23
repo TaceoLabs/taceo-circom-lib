@@ -15,7 +15,7 @@ describe("BabyJubJub is in Fr ", function () {
       {
         include: [
           path.join(__dirname, "../circuits"),
-          path.join(__dirname, "../node_modules/circomlib/circuits"),
+          path.join(__dirname, "../node_modules"),
         ],
       },
     );

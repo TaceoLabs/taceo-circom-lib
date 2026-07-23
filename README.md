@@ -14,19 +14,19 @@ pnpm add @taceo/circom-lib
 
 [circomlib](https://github.com/iden3/circomlib) is a peer dependency: some circuits (e.g. `precomputations.circom`, and `compression.circom` through it) include circomlib templates. pnpm 8+ and npm 7+ install it automatically; otherwise add it explicitly with `pnpm add circomlib`.
 
-Circuits use bare includes, so pass both library roots to circom via `-l`:
+Include circuits by their package-qualified path and compile with a single `-l node_modules`:
 
 ```circom
-include "compression.circom";
+include "@taceo/circom-lib/circuits/compression.circom";
 
 component main = Compression(4, 4, 1);
 ```
 
 ```bash
-circom your_circuit.circom --r1cs --wasm \
-  -l node_modules/@taceo/circom-lib/circuits \
-  -l node_modules/circomlib/circuits
+circom your_circuit.circom --r1cs --wasm -l node_modules
 ```
+
+Within the library, circuits reference each other by bare filename (e.g. `poseidon2.circom` includes `poseidon2_constants.circom`), since circom resolves bare includes relative to the including file first. circomlib templates are referenced by package-qualified path (e.g. `circomlib/circuits/bitify.circom`), which is why circomlib must be installed for the `-l node_modules` root to resolve them.
 
 ## Circuits
 

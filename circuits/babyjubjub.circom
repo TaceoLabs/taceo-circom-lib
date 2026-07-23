@@ -1,10 +1,10 @@
 pragma circom 2.2.2;
 
-include "babyjub.circom";
-include "escalarmulany.circom";
-include "comparators.circom";
-include "compconstant.circom";
-include "bitify.circom";
+include "circomlib/circuits/babyjub.circom";
+include "circomlib/circuits/escalarmulany.circom";
+include "circomlib/circuits/comparators.circom";
+include "circomlib/circuits/compconstant.circom";
+include "circomlib/circuits/bitify.circom";
 
 // Utilities for working with the BabyJubJub curve in Circom 2.x, using Twisted Edwards form.
 // This file defines:

@@ -11,7 +11,7 @@ describe("UHF kats", function () {
     circuit = await wasm(path.join(__dirname, "circuits/uhf_test.circom"), {
       include: [
         path.join(__dirname, "../circuits"),
-        path.join(__dirname, "../node_modules/circomlib/circuits"),
+        path.join(__dirname, "../node_modules"),
       ],
     });
     await circuit.loadConstraints();
