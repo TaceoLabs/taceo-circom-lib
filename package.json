@@ -1,0 +1,34 @@
+{
+  "name": "@taceo/circom-lib",
+  "version": "0.1.0",
+  "description": "Circom library for the TACEO ecosystem",
+  "license": "MIT",
+  "files": [
+    "circuits",
+    "README.md",
+    "LICENSE"
+  ],
+  "keywords": [
+    "circom",
+    "circuit",
+    "zksnark",
+    "taceo"
+  ],
+  "repository": {
+    "type": "git",
+    "url": "https://github.com/TaceoLabs/taceo-circom-lib.git"
+  },
+  "scripts": {
+    "test": "mocha \"tests/**/*.test.js\""
+  },
+  "peerDependencies": {
+    "circomlib": "^2.0.5"
+  },
+  "devDependencies": {
+    "chai": "^6.0.1",
+    "circom_tester": "^0.0.24",
+    "circomlib": "^2.0.5",
+    "mocha": "^11.7.1",
+    "snarkjs": "^0.7.6"
+  }
+}
