@@ -33,8 +33,7 @@ template Compression(N, T, DS) {
     signal output beta;
     signal output gamma;
 
-    beta <== Poseidon2Sponge(N, T, DS)(q);
-    gamma <== UHF(N)(alpha, beta, q);
+    (beta, gamma) <== CompressionWithDs(N, T)(q, alpha, DS);
 }
 
 /// Same as `Compression`, but the sponge's domain separator is a runtime signal
@@ -81,30 +80,7 @@ template Poseidon2Sponge(N, T, DS) {
     signal input in[N];
     signal output out;
 
-    assert(T >= 2);
-    assert(N >= 1);
-
-    var permutations = (N + T - 2) \ (T-1);
-    var states[permutations + 1][T];
-
-    for (var i = 0; i < T - 1; i++) {
-        states[0][i] = 0;
-    }
-    states[0][T - 1] = DS;
-
-    var absorbed = 0;
-    for (var p = 0; p < permutations; p++) {
-        var remaining = N - absorbed;
-        if (remaining > T - 1) {
-            remaining = T - 1;
-        }
-        for (var i = 0; i < remaining; i++) {
-            states[p][i] = states[p][i] + in[absorbed + i];
-        }
-        absorbed += remaining;
-        states[p + 1] = TACEO_PRECOMPUTATION_Poseidon2(T)(states[p]);
-    }
-    out <== states[permutations][0];
+    out <== Poseidon2SpongeWithDs(N, T)(in, DS);
 }
 
 
