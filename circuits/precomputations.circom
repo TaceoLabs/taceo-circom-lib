@@ -1,9 +1,9 @@
 pragma circom 2.2.2;
 
 include "poseidon2.circom";
-include "aliascheck.circom";
-include "bitify.circom";
-include "comparators.circom";
+include "circomlib/circuits/aliascheck.circom";
+include "circomlib/circuits/bitify.circom";
+include "circomlib/circuits/comparators.circom";
 
 template TACEO_PRECOMPUTATION_Poseidon2(T) {
     signal input in[T];

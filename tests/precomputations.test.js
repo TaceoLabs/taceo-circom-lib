@@ -3,7 +3,7 @@ const path = require("path");
 
 const INCLUDE = [
   path.join(__dirname, "../circuits"),
-  path.join(__dirname, "../node_modules/circomlib/circuits"),
+  path.join(__dirname, "../node_modules"),
 ];
 
 const P =

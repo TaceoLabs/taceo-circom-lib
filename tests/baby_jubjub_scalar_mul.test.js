@@ -23,7 +23,7 @@ describe("BabyJubJub Scalar Mul", function () {
       {
         include: [
           path.join(__dirname, "../circuits"),
-          path.join(__dirname, "../node_modules/circomlib/circuits"),
+          path.join(__dirname, "../node_modules"),
         ],
       },
     );
