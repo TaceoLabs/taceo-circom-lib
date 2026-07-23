@@ -10,12 +10,12 @@ function amount_partial_rounds(t) {
 
 function load_diag(t) {
      if (t == 4) {
-       return 
+       return
     [0x10dc6e9c006ea38b04b1e03b4bd9490c0d03f98929ca1d7fb56821fd19d3b6e7,
     0x0c28145b6a44df3e0149b3d0a30b3bb599df9756d4dd9b84a86b38cfb45a740b,
     0x00544b8338791518b2c7645a50392798b21f75bb60e3596170067d00141cac15,
     0x222c01175718386f2e2e82eb122789e352e105a3b8fa852613bc534433ee428b
-]; 
+];
     } else if (t == 8) {
         return [
     0x05bffb5e301d8c468c35e24eb2165b6b71725fb7ac9a48efe5ce041bdb05676d,
