@@ -3,7 +3,7 @@ pragma circom 2.2.2;
 // This file is copied from https://github.com/zk-kit/zk-kit.circom/blob/main/packages/binary-merkle-root/src/binary-merkle-root.circom and adapted to use Poseidon2 instead of Poseidon and use it in compression mode and not in sponge mode.
 
 include "precomputations.circom";
-include "circomlib/circuits/comparators.circom";
+include "bbf.circom";
 
 // This circuit is designed to calculate the root of a binary Merkle
 // tree given a leaf, its depth, and the necessary sibling
@@ -47,7 +47,7 @@ template BinaryMerkleRootWithDs(MAX_DEPTH) {
     signal should_be_zeros[MAX_DEPTH];
 
     for (var i = 0; i < MAX_DEPTH; i++) {
-        var isDepth = IsEqual()([depth, i]);
+        var isDepth = IsEqualBbf()([depth, i]);
         is_depth[i] <== isDepth;
         roots[i] <== isDepth * nodes[i];
         root += roots[i];
@@ -64,7 +64,7 @@ template BinaryMerkleRootWithDs(MAX_DEPTH) {
         nodes[i + 1] <== poseidon_result[0] + hash_left[i];
     }
 
-    var isDepth = IsEqual()([depth, MAX_DEPTH]);
+    var isDepth = IsEqualBbf()([depth, MAX_DEPTH]);
     is_depth[MAX_DEPTH] <== isDepth;
 
     out <== root + isDepth * nodes[MAX_DEPTH];

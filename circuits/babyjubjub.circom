@@ -2,9 +2,8 @@ pragma circom 2.2.2;
 
 include "circomlib/circuits/babyjub.circom";
 include "circomlib/circuits/escalarmulany.circom";
-include "circomlib/circuits/comparators.circom";
 include "circomlib/circuits/compconstant.circom";
-include "circomlib/circuits/bitify.circom";
+include "bbf.circom";
 
 // Utilities for working with the BabyJubJub curve in Circom 2.x, using Twisted Edwards form.
 // This file defines:
@@ -104,7 +103,7 @@ template BabyJubJubScalarGenerator() {
     input BabyJubJubScalarField() e;
     output BabyJubJubPoint() { twisted_edwards_in_subgroup } out;
 
-    out <== BabyJubJubScalarGeneratorBits()(Num2Bits(251)(e.f));
+    out <== BabyJubJubScalarGeneratorBits()(Num2BitsBbf(251)(e.f));
 }
 
 // Performs fixed-base scalar multiplication e·G, where G is the BabyJubJub generator.
@@ -132,7 +131,7 @@ template BabyJubJubScalarMulFix(BASE) {
     input BabyJubJubScalarField() e;
     output BabyJubJubPoint() { twisted_edwards_in_subgroup } out;
 
-    out <== BabyJubJubScalarMulFixBits(BASE)(Num2Bits(251)(e.f));
+    out <== BabyJubJubScalarMulFixBits(BASE)(Num2BitsBbf(251)(e.f));
 }
 
 // Performs fixed-point scalar multiplication e·P for a constant point P.
@@ -157,7 +156,7 @@ template BabyJubJubScalarMul() {
     input BabyJubJubPoint() { twisted_edwards_in_subgroup } p;
     output BabyJubJubPoint() { twisted_edwards_in_subgroup } out;
 
-    out <== BabyJubJubScalarMulBits()(Num2Bits(251)(e.f), p);
+    out <== BabyJubJubScalarMulBits()(Num2BitsBbf(251)(e.f), p);
 }
 
 // Performs scalar multiplication e·P for an arbitrary point P in Twisted Edwards form.
@@ -188,7 +187,7 @@ template BabyJubJubScalarMulBaseField() {
     input BabyJubJubPoint() { twisted_edwards_in_subgroup } p;
     output BabyJubJubPoint() { twisted_edwards_in_subgroup } out;
 
-    signal bits[254] <== Num2Bits_strict()(e.f);
+    signal bits[254] <== Num2Bits_strictBbf()(e.f);
     // performs the module reduction correctly
     signal result[2] <== EscalarMulAny(254)(bits, [p.x,p.y]);
     out.x <== result[0];
@@ -207,7 +206,7 @@ template BabyJubJubIsInFr() {
     // Prime order of BabyJubJub's scalar field Fr.
     var fr = 2736030358979909402780800718157159386076813972158567259200215660948447373041;
 
-    signal bits[253] <== Num2Bits(253)(in);
+    signal bits[253] <== Num2BitsBbf(253)(in);
     // CompConstant enforces <=, so compare against (fr - 1).
     component compConstant = CompConstant(fr - 1);
     for (var i=0; i<253; i++) {
@@ -228,8 +227,8 @@ template BabyJubJubIsInFr() {
 // We do not require tags here since this component is valid for all combinations of x/y.
 template BabyJubJubCheckNotIdentity() {
     input BabyJubJubPoint() p;
-    signal x_check <== IsZero()(p.x);
-    signal y_check <== IsZero()(1 - p.y);
+    signal x_check <== IsZeroBbf()(p.x);
+    signal y_check <== IsZeroBbf()(1 - p.y);
 
     // At least one of the is zero check must be 0. If both are one, it is the identity element which fails the constraint.
     x_check * y_check === 0;
