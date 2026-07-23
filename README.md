@@ -1,4 +1,7 @@
 # taceo-circom-lib
+[![Circom Tests](https://github.com/TaceoLabs/taceo-circom-lib/actions/workflows/ci.yml/badge.svg)](https://github.com/TaceoLabs/taceo-circom-lib/actions/workflows/ci.yml)
+[![License](https://img.shields.io/badge/license-MIT-blue.svg)](LICENSE)
+
 Circom library for TACEO ecosystem, structured like [circomlib](https://github.com/iden3/circomlib) so it can be pulled into other repos as a dependency.
 
 ## Usage
