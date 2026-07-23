@@ -1,8 +1,9 @@
 #!/usr/bin/env python3
-"""Generate KAT JSON files for the templates in circuits/compression.circom.
+"""Generate KAT JSON files for the templates in circuits/compression.circom
+and circuits/binary_merkle_root.circom.
 
-Reimplements the Poseidon2 permutation, the sponges and the UHF in pure
-Python, parsing the round constants directly out of
+Reimplements the Poseidon2 permutation, the sponges, the UHF and the binary
+Merkle root in pure Python, parsing the round constants directly out of
 circuits/poseidon2_constants.circom. Before writing anything, the
 permutation is self-checked against the kat0 vectors hardcoded in
 tests/poseidon2_t*.test.js. Output goes to tests/kats/*.json.
@@ -29,6 +30,10 @@ SEED = 0x7ACE0
 # Compile-time domain separator baked into the non-WithDs test wrappers
 DS = 1
 UHF_N = 4
+# Compile-time domain separator baked into the non-WithDs merkle test wrapper
+MERKLE_DS = 0xDEADBEEF
+MERKLE_MAX_DEPTH = 10
+MERKLE_DEPTHS = [0, 1, 5, 10]
 
 
 # --- constant extraction from poseidon2_constants.circom ---------------------
@@ -159,6 +164,23 @@ def poseidon2_sponge(inputs, t, ds, consts):
     return state[0]
 
 
+# --- binary Merkle root (mirrors circuits/binary_merkle_root.circom) -----------
+
+def merkle_node(left, right, ds, consts):
+    """Poseidon2 t=2 in compression mode: perm([left + ds, right])[0] + left."""
+    return (poseidon2([(left + ds) % P, right], consts)[0] + left) % P
+
+
+def merkle_root(leaf, index_bits, hash_path, depth, ds, consts):
+    node = leaf
+    for i in range(depth):
+        if index_bits[i]:
+            node = merkle_node(hash_path[i], node, ds, consts)
+        else:
+            node = merkle_node(node, hash_path[i], ds, consts)
+    return node
+
+
 def uhf(alpha, beta, x):
     seed = (alpha + beta) % P
     acc = 0
@@ -276,6 +298,30 @@ def main():
             }
         )
     files["uhf.json"] = uhf_kats
+
+    def merkle_kat(depth, ds):
+        leaf = fe()
+        index_bits = [rng.randrange(2) for _ in range(depth)] + [0] * (
+            MERKLE_MAX_DEPTH - depth
+        )
+        hash_path = [fe() for _ in range(MERKLE_MAX_DEPTH)]
+        return {
+            "leaf": hexstr(leaf),
+            "depth": depth,
+            "index_bits": index_bits,
+            "hash_path": [hexstr(x) for x in hash_path],
+            "out": hexstr(merkle_root(leaf, index_bits, hash_path, depth, ds, consts[2])),
+        }
+
+    merkle_kats, merkle_ds_kats = [], []
+    for depth in MERKLE_DEPTHS:
+        for _ in range(KATS_PER_FILE):
+            merkle_kats.append(merkle_kat(depth, MERKLE_DS))
+
+            ds = fe()
+            merkle_ds_kats.append({**merkle_kat(depth, ds), "ds": hexstr(ds)})
+    files["binary_merkle_root.json"] = merkle_kats
+    files["binary_merkle_root_with_ds.json"] = merkle_ds_kats
 
     for name, kats in files.items():
         (KAT_DIR / name).write_text(json.dumps(kats, indent=2) + "\n")
