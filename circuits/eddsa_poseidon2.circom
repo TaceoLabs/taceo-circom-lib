@@ -22,7 +22,7 @@ pragma circom 2.0.0;
 
 include "poseidon2.circom";
 include "babyjubjub.circom";
-include "bbf.circom";
+include "circomlib/circuits/comparators.circom";
 
 template EdDSAPoseidon2Verifier() {
     signal input Ax;
@@ -58,7 +58,7 @@ template EdDSAPoseidon2Verifier() {
     // We check that A is on the curve and in the correct subgroup.
     BabyJubJubPoint { twisted_edwards_in_subgroup } A_p <== BabyJubJubCheckAndSubgroupCheck()(Ax, Ay);
     // We check that A is not zero.
-    component isZero = IsZeroBbf();
+    component isZero = IsZero();
     isZero.in <== Ax;
     isZero.out === 0;
 

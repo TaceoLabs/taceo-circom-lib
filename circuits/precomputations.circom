@@ -2,7 +2,8 @@ pragma circom 2.2.2;
 
 include "poseidon2.circom";
 include "circomlib/circuits/aliascheck.circom";
-include "bbf.circom";
+include "circomlib/circuits/bitify.circom";
+include "circomlib/circuits/comparators.circom";
 
 template TACEO_PRECOMPUTATION_Poseidon2(T) {
     signal input in[T];
@@ -15,7 +16,7 @@ template TACEO_PRECOMPUTATION_Num2Bits(n) {
     signal input in;
     signal output out[n];
 
-    out <== Num2BitsBbf(n)(in);
+    out <== Num2Bits(n)(in);
 }
 
 template TACEO_PRECOMPUTATION_AliasCheck() {
@@ -28,5 +29,5 @@ template TACEO_PRECOMPUTATION_IsZero() {
     signal input in;
     signal output out;
 
-    out <== IsZeroBbf()(in);
+    out <== IsZero()(in);
 }

@@ -12,7 +12,7 @@ Add it to your project via pnpm (or npm/yarn):
 pnpm add @taceo/circom-lib
 ```
 
-[circomlib](https://github.com/iden3/circomlib) is a peer dependency: some circuits (e.g. `precomputations.circom` and `bbf.circom`, and `compression.circom`/`babyjubjub.circom` through them) include circomlib templates. pnpm 8+ and npm 7+ install it automatically; otherwise add it explicitly with `pnpm add circomlib`.
+[circomlib](https://github.com/iden3/circomlib) is a peer dependency: some circuits (e.g. `precomputations.circom`, and `compression.circom`/`babyjubjub.circom` through it) include circomlib templates. pnpm 8+ and npm 7+ install it automatically; otherwise add it explicitly with `pnpm add circomlib`.
 
 Include circuits by their package-qualified path and compile with a single `-l node_modules`:
 
@@ -32,20 +32,16 @@ Within the library, circuits reference each other by bare filename (e.g. `poseid
 
 - `poseidon2.circom`: Poseidon2 permutation over the BN254 scalar field for state sizes t ∈ {2, 3, 4, 8, 12, 16}
 - `compression.circom`: public input compression via [hybrid compression](https://eprint.iacr.org/2025/1500): Poseidon2-based sponges (`Poseidon2Sponge`, `Poseidon2SpongeWithDs`), a universal hash function (`UHF`), and `Compression`/`CompressionWithDs` combining both
-- `precomputations.circom`: `TACEO_PRECOMPUTATION_*` wrappers around Poseidon2 and the `bbf.circom` templates, for MPC-proving
-- `bbf.circom`: black-box-function (`*Bbf`) variants of `IsZero`, `Num2Bits`, `Num2Bits_strict`, and `IsEqual`, for plain single-prover witness generation
+- `precomputations.circom`: `TACEO_PRECOMPUTATION_*` wrappers around Poseidon2 and circomlib primitives (`Num2Bits`, `IsZero`, `AliasCheck`), for MPC-proving
 - `babyjubjub.circom`: BabyJubJub curve operations (curve/subgroup checks, scalar multiplication, ...)
 - `eddsa_poseidon2.circom`: EdDSA signature verification using Poseidon2
 - `binary_merkle_root.circom`: binary Merkle root from a membership proof (adapted from [zk-kit](https://github.com/zk-kit/zk-kit.circom), using Poseidon2 in compression mode), with dynamic depth up to `MAX_DEPTH`, enforcement that path bits beyond the depth are zero, and the domain separator as a compile-time parameter (`BinaryMerkleRoot`) or runtime signal (`BinaryMerkleRootWithDs`)
 
 The `poseidon2`, `eddsa_poseidon2`, and `babyjubjub` circuits are pulled from the audited repository for [TACEO:OPRF](https://github.com/TaceoLabs/oprf-circom/).
 
-### Witness generation: single prover vs MPC
+### MPC-proving
 
-Circuits in this library only take witness hints (`<--`) from named functions, never inline expressions, so they support two witness-generation modes:
-
-- **Single prover (non-MPC)**: `bbf.circom` provides black-box-function (`*Bbf`) variants of the circomlib primitives whose hints would otherwise be inline (`IsZero`, `Num2Bits`, `Num2Bits_strict`, `IsEqual`). All circuits in this library use these `*Bbf` templates instead of the circomlib originals, so they work as-is with [circom-witness-rs](https://github.com/philsippl/circom-witness-rs), which builds a witness graph from the circuit and needs to map each hint to a Rust function.
-- **MPC-proving**: `precomputations.circom` provides `TACEO_PRECOMPUTATION_*` wrappers (around Poseidon2, `AliasCheck`, and the `bbf.circom` templates) for use with the TACEO MPC-proving stack instead.
+`precomputations.circom` provides `TACEO_PRECOMPUTATION_*` wrappers around Poseidon2 and circomlib primitives (`Num2Bits`, `IsZero`, `AliasCheck`) for use with the TACEO MPC-proving stack.
 
 ### Public input compression
 
