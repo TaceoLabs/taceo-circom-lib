@@ -1,6 +1,7 @@
 {
   "name": "@taceo/circom-lib",
   "version": "0.1.0",
+  "packageManager": "pnpm@11.9.0",
   "description": "Circom library for the TACEO ecosystem",
   "license": "MIT",
   "files": [
