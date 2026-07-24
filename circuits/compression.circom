@@ -26,26 +26,18 @@ include "precomputations.circom";
 /// https://eprint.iacr.org/2025/1500, Construction 2.
 /// * N length of the statement `q`
 /// * T Poseidon2 state size used by the sponge (2, 3, 4, 8, 12, or 16)
-/// * DS compile-time domain separator for the sponge
-template Compression(N, T, DS) {
+template Compression(N, T) {
     signal input q[N];
     signal input alpha;
     signal output beta;
     signal output gamma;
 
-    (beta, gamma) <== CompressionWithDs(N, T)(q, alpha, DS);
-}
+    // This is the ASCII byte sequence "eprint.iacr.org/2025/1500+Pos2" interpreted as a field element.
+    // It consists of the link to the TwoHash paper, without the leading "https://", concatenated with
+    // an identifier for the Poseidon2 hash function.
+    var DS = 0x657072696E742E696163722E6F72672F323032352F313530302B506F7332;
 
-/// Same as `Compression`, but the sponge's domain separator is a runtime signal
-/// instead of a compile-time parameter.
-template CompressionWithDs(N, T) {
-    signal input q[N];
-    signal input alpha;
-    signal input ds;
-    signal output beta;
-    signal output gamma;
-
-    beta <== Poseidon2SpongeWithDs(N, T)(q, ds);
+    beta <== Poseidon2Sponge(N, T, DS)(q);
     gamma <== UHF(N)(alpha, beta, q);
 }
 

@@ -19,7 +19,7 @@ Include circuits by their package-qualified path and compile with a single `-l n
 ```circom
 include "@taceo/circom-lib/circuits/compression.circom";
 
-component main = Compression(4, 4, 1);
+component main = Compression(4, 4);
 ```
 
 ```bash
@@ -31,7 +31,7 @@ Within the library, circuits reference each other by bare filename (e.g. `poseid
 ## Circuits
 
 - `poseidon2.circom`: Poseidon2 permutation over the BN254 scalar field for state sizes t ∈ {2, 3, 4, 8, 12, 16}
-- `compression.circom`: public input compression via [hybrid compression](https://eprint.iacr.org/2025/1500): Poseidon2-based sponges (`Poseidon2Sponge`, `Poseidon2SpongeWithDs`), a universal hash function (`UHF`), and `Compression`/`CompressionWithDs` combining both
+- `compression.circom`: public input compression via [hybrid compression](https://eprint.iacr.org/2025/1500): Poseidon2-based sponges (`Poseidon2Sponge`, `Poseidon2SpongeWithDs`), a universal hash function (`UHF`), and `Compression` combining both with a fixed domain separator
 - `precomputations.circom`: `TACEO_PRECOMPUTATION_*` wrappers around Poseidon2 and circomlib primitives (`Num2Bits`, `IsZero`, `AliasCheck`), for MPC-proving
 - `babyjubjub.circom`: BabyJubJub curve operations (curve/subgroup checks, scalar multiplication, ...)
 - `eddsa_poseidon2.circom`: EdDSA signature verification using Poseidon2
