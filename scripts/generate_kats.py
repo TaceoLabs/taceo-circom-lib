@@ -27,8 +27,11 @@ P = 2188824287183927522224640574525727508854836440041603434369820418657580849561
 STATE_SIZES = [2, 3, 4, 8, 12, 16]
 KATS_PER_FILE = 2
 SEED = 0x7ACE0
-# Compile-time domain separator baked into the non-WithDs test wrappers
+# Compile-time domain separator baked into the poseidon2_sponge_t* test wrappers
 DS = 1
+# Compile-time domain separator hardcoded into the Compression template
+# ("eprint.iacr.org/2025/1500+Pos2" interpreted as a field element)
+COMPRESSION_DS = 0x657072696E742E696163722E6F72672F323032352F313530302B506F7332
 UHF_N = 4
 # Compile-time domain separator baked into the non-WithDs merkle test wrapper
 MERKLE_DS = 0xDEADBEEF
@@ -234,7 +237,7 @@ def main():
     files = {}
     for t in STATE_SIZES:
         n = t  # 2 permutations, final block partially filled
-        sponge_kats, sponge_ds_kats, comp_kats, comp_ds_kats = [], [], [], []
+        sponge_kats, sponge_ds_kats, comp_kats = [], [], []
         for _ in range(KATS_PER_FILE):
             inputs = [fe() for _ in range(n)]
             sponge_kats.append(
@@ -256,7 +259,7 @@ def main():
 
             q = [fe() for _ in range(n)]
             alpha = fe()
-            beta = poseidon2_sponge(q, t, DS, consts[t])
+            beta = poseidon2_sponge(q, t, COMPRESSION_DS, consts[t])
             comp_kats.append(
                 {
                     "q": [hexstr(x) for x in q],
@@ -266,24 +269,9 @@ def main():
                 }
             )
 
-            q = [fe() for _ in range(n)]
-            alpha = fe()
-            ds = fe()
-            beta = poseidon2_sponge(q, t, ds, consts[t])
-            comp_ds_kats.append(
-                {
-                    "q": [hexstr(x) for x in q],
-                    "alpha": hexstr(alpha),
-                    "ds": hexstr(ds),
-                    "beta": hexstr(beta),
-                    "gamma": hexstr(uhf(alpha, beta, q)),
-                }
-            )
-
         files[f"poseidon2_sponge_t{t}.json"] = sponge_kats
         files[f"poseidon2_sponge_with_ds_t{t}.json"] = sponge_ds_kats
         files[f"compression_t{t}.json"] = comp_kats
-        files[f"compression_with_ds_t{t}.json"] = comp_ds_kats
 
     uhf_kats = []
     for _ in range(KATS_PER_FILE):
