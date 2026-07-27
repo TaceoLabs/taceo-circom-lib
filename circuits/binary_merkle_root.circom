@@ -20,7 +20,7 @@ include "circomlib/circuits/comparators.circom";
 // may be equal to or less than the static maximum depth.
 //
 // NOTE: This circuit will successfully verify `out = 0` for `depth > MAX_DEPTH`.
-// Furthermore, it is *not* enforced that index_bats are 0 or 1. This needs to
+// Furthermore, it is *not* enforced that index_bits are 0 or 1. This needs to
 // be done elsewhere in the circuit.
 // Make sure to enforce `depth <= MAX_DEPTH` outside the circuit.
 //
