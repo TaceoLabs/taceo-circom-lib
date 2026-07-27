@@ -33,8 +33,6 @@ DS = 1
 # ("eprint.iacr.org/2025/1500+Pos2" interpreted as a field element)
 COMPRESSION_DS = 0x657072696E742E696163722E6F72672F323032352F313530302B506F7332
 UHF_N = 4
-# Compile-time domain separator baked into the non-WithDs merkle test wrapper
-MERKLE_DS = 0xDEADBEEF
 MERKLE_MAX_DEPTH = 10
 MERKLE_DEPTHS = [0, 1, 5, 10]
 
@@ -169,18 +167,18 @@ def poseidon2_sponge(inputs, t, ds, consts):
 
 # --- binary Merkle root (mirrors circuits/binary_merkle_root.circom) -----------
 
-def merkle_node(left, right, ds, consts):
-    """Poseidon2 t=2 in compression mode: perm([left + ds, right])[0] + left."""
-    return (poseidon2([(left + ds) % P, right], consts)[0] + left) % P
+def merkle_node(left, right, consts):
+    """Poseidon2 t=2 in compression mode: perm([left, right])[0] + left."""
+    return (poseidon2([left, right], consts)[0] + left) % P
 
 
-def merkle_root(leaf, index_bits, hash_path, depth, ds, consts):
+def merkle_root(leaf, index_bits, hash_path, depth, consts):
     node = leaf
     for i in range(depth):
         if index_bits[i]:
-            node = merkle_node(hash_path[i], node, ds, consts)
+            node = merkle_node(hash_path[i], node, consts)
         else:
-            node = merkle_node(node, hash_path[i], ds, consts)
+            node = merkle_node(node, hash_path[i], consts)
     return node
 
 
@@ -287,7 +285,7 @@ def main():
         )
     files["uhf.json"] = uhf_kats
 
-    def merkle_kat(depth, ds):
+    def merkle_kat(depth):
         leaf = fe()
         index_bits = [rng.randrange(2) for _ in range(depth)] + [0] * (
             MERKLE_MAX_DEPTH - depth
@@ -298,18 +296,14 @@ def main():
             "depth": depth,
             "index_bits": index_bits,
             "hash_path": [hexstr(x) for x in hash_path],
-            "out": hexstr(merkle_root(leaf, index_bits, hash_path, depth, ds, consts[2])),
+            "out": hexstr(merkle_root(leaf, index_bits, hash_path, depth, consts[2])),
         }
 
-    merkle_kats, merkle_ds_kats = [], []
+    merkle_kats = []
     for depth in MERKLE_DEPTHS:
         for _ in range(KATS_PER_FILE):
-            merkle_kats.append(merkle_kat(depth, MERKLE_DS))
-
-            ds = fe()
-            merkle_ds_kats.append({**merkle_kat(depth, ds), "ds": hexstr(ds)})
+            merkle_kats.append(merkle_kat(depth))
     files["binary_merkle_root.json"] = merkle_kats
-    files["binary_merkle_root_with_ds.json"] = merkle_ds_kats
 
     for name, kats in files.items():
         (KAT_DIR / name).write_text(json.dumps(kats, indent=2) + "\n")

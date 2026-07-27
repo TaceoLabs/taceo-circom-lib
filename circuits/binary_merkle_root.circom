@@ -24,14 +24,18 @@ include "circomlib/circuits/comparators.circom";
 // be done elsewhere in the circuit.
 // Make sure to enforce `depth <= MAX_DEPTH` outside the circuit.
 //
-// The domain separator `ds` is added to the left child before hashing and is a
-// runtime signal here; see `BinaryMerkleRoot` for a compile-time variant.
-template BinaryMerkleRootWithDs(MAX_DEPTH) {
+// There is no dedicated domain separation for compressing the different
+// Merkle tree layers. If domain separation is required, leaf values must
+// be domain separated before being passed to this circuit. Ideally, leaf
+// values should not use the same hash construction as internal nodes
+// (e.g. by using a sponge construction with a distinct domain separator
+// in the capacity element) to prevent leaf values from being interpreted
+// as internal node values.
+template BinaryMerkleRoot(MAX_DEPTH) {
     signal input leaf;
     signal input index_bits[MAX_DEPTH];
     signal input hash_path[MAX_DEPTH];
     signal input depth;
-    signal input ds;
     signal output out;
 
     signal nodes[MAX_DEPTH + 1];
@@ -60,7 +64,7 @@ template BinaryMerkleRootWithDs(MAX_DEPTH) {
         hash_right[i] <== path_hash - mul[i];
 
        // Compression mode
-        var poseidon_result[2] = TACEO_PRECOMPUTATION_Poseidon2(2)([hash_left[i] + ds, hash_right[i]]);
+        var poseidon_result[2] = TACEO_PRECOMPUTATION_Poseidon2(2)([hash_left[i], hash_right[i]]);
         nodes[i + 1] <== poseidon_result[0] + hash_left[i];
     }
 
@@ -84,14 +88,3 @@ template BinaryMerkleRootWithDs(MAX_DEPTH) {
     }
 }
 
-// Same as `BinaryMerkleRootWithDs`, but the domain separator is a compile-time
-// parameter instead of a runtime signal.
-template BinaryMerkleRoot(MAX_DEPTH, DS) {
-    signal input leaf;
-    signal input index_bits[MAX_DEPTH];
-    signal input hash_path[MAX_DEPTH];
-    signal input depth;
-    signal output out;
-
-    out <== BinaryMerkleRootWithDs(MAX_DEPTH)(leaf, index_bits, hash_path, depth, DS);
-}
