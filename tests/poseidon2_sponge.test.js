@@ -27,7 +27,7 @@ describe("Poseidon2Sponge kats", function () {
       kats.forEach((kat, i) => {
         it(`kat${i}`, async () => {
           const witness = await circuit.calculateWitness(
-            { in: kat.in.map(BigInt) },
+            { in: kat.in.map(BigInt), ds: BigInt(kat.ds) },
             true,
           );
           await circuit.assertOut(witness, { out: BigInt(kat.out) });
