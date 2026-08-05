@@ -37,7 +37,7 @@ template Compression(N, T) {
     // an identifier for the Poseidon2 hash function.
     var DS = 0x657072696E742E696163722E6F72672F323032352F313530302B506F7332;
 
-    beta <== Poseidon2Sponge(N, T, DS)(q);
+    beta <== Poseidon2Sponge(N, T)(q, DS);
     gamma <== UHF(N)(alpha, beta, q);
 }
 
@@ -63,21 +63,11 @@ template UHF(N) {
 }
 
 /// Poseidon2 in sponge mode: rate T-1, one capacity element initialized with the
-/// domain separator `DS`, zero-initialized state. Absorbs `in` in chunks of T-1 (the last
+/// domain separator `ds` (a runtime signal), zero-initialized state. Absorbs `in` in chunks of T-1 (the last
 /// chunk may be partial, without padding), permuting after each chunk; the output is the
 /// first state element. Note: like the paper's nested hashing, this is only safe when the
 /// input length N is fixed by the protocol.
-/// DS compile-time domain separator, placed in the capacity element
-template Poseidon2Sponge(N, T, DS) {
-    signal input in[N];
-    signal output out;
-
-    out <== Poseidon2SpongeWithDs(N, T)(in, DS);
-}
-
-
-/// Same as `Poseidon2Sponge`, but the domain separator is a runtime signal.
-template Poseidon2SpongeWithDs(N, T) {
+template Poseidon2Sponge(N, T) {
     signal input in[N];
     signal input ds;
     signal output out;
@@ -107,4 +97,3 @@ template Poseidon2SpongeWithDs(N, T) {
     }
     out <== states[permutations][0];
 }
-

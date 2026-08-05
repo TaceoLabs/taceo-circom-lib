@@ -2,7 +2,7 @@
 """Generate KAT JSON files for the templates in circuits/compression.circom
 and circuits/binary_merkle_root.circom.
 
-Reimplements the Poseidon2 permutation, the sponges, the UHF and the binary
+Reimplements the Poseidon2 permutation, the sponge, the UHF and the binary
 Merkle root in pure Python, parsing the round constants directly out of
 circuits/poseidon2_constants.circom. Before writing anything, the
 permutation is self-checked against the kat0 vectors hardcoded in
@@ -27,8 +27,6 @@ P = 2188824287183927522224640574525727508854836440041603434369820418657580849561
 STATE_SIZES = [2, 3, 4, 8, 12, 16]
 KATS_PER_FILE = 2
 SEED = 0x7ACE0
-# Compile-time domain separator baked into the poseidon2_sponge_t* test wrappers
-DS = 1
 # Compile-time domain separator hardcoded into the Compression template
 # ("eprint.iacr.org/2025/1500+Pos2" interpreted as a field element)
 COMPRESSION_DS = 0x657072696E742E696163722E6F72672F323032352F313530302B506F7332
@@ -235,19 +233,11 @@ def main():
     files = {}
     for t in STATE_SIZES:
         n = t  # 2 permutations, final block partially filled
-        sponge_kats, sponge_ds_kats, comp_kats = [], [], []
+        sponge_kats, comp_kats = [], []
         for _ in range(KATS_PER_FILE):
             inputs = [fe() for _ in range(n)]
-            sponge_kats.append(
-                {
-                    "in": [hexstr(x) for x in inputs],
-                    "out": hexstr(poseidon2_sponge(inputs, t, DS, consts[t])),
-                }
-            )
-
-            inputs = [fe() for _ in range(n)]
             ds = fe()
-            sponge_ds_kats.append(
+            sponge_kats.append(
                 {
                     "in": [hexstr(x) for x in inputs],
                     "ds": hexstr(ds),
@@ -268,7 +258,6 @@ def main():
             )
 
         files[f"poseidon2_sponge_t{t}.json"] = sponge_kats
-        files[f"poseidon2_sponge_with_ds_t{t}.json"] = sponge_ds_kats
         files[f"compression_t{t}.json"] = comp_kats
 
     uhf_kats = []
