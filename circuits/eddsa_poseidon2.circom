@@ -34,8 +34,6 @@ template EdDSAPoseidon2Verifier() {
 
     signal input M;
 
-    var i;
-
     // Ensure S < Subgroup Order
     component sRange = BabyJubJubIsInFr();
     sRange.in <== S;

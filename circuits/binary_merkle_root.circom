@@ -51,9 +51,8 @@ template BinaryMerkleRoot(MAX_DEPTH) {
     signal shouldBeZeros[MAX_DEPTH];
 
     for (var i = 0; i < MAX_DEPTH; i++) {
-        var isDepthVal = IsEqual()([depth, i]);
-        isDepth[i] <== isDepthVal;
-        roots[i] <== isDepthVal * nodes[i];
+        isDepth[i] <== IsEqual()([depth, i]);
+        roots[i] <== isDepth[i] * nodes[i];
         root += roots[i];
 
         var pathBit = indexBits[i];
@@ -68,10 +67,9 @@ template BinaryMerkleRoot(MAX_DEPTH) {
         nodes[i + 1] <== poseidonResult[0] + hashLeft[i];
     }
 
-    var isDepthVal = IsEqual()([depth, MAX_DEPTH]);
-    isDepth[MAX_DEPTH] <== isDepthVal;
+    isDepth[MAX_DEPTH] <== IsEqual()([depth, MAX_DEPTH]);
 
-    out <== root + isDepthVal * nodes[MAX_DEPTH];
+    out <== root + isDepth[MAX_DEPTH] * nodes[MAX_DEPTH];
 
     // For our use case we need to enforce that the index is in range. We do this by checking that for all bits greater than the depth, the index bit is zero.
     // We can reuse the isDepth signal from above to do this.
