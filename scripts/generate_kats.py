@@ -27,6 +27,8 @@ P = 2188824287183927522224640574525727508854836440041603434369820418657580849561
 STATE_SIZES = [2, 3, 4, 8, 12, 16]
 KATS_PER_FILE = 2
 SEED = 0x7ACE0
+# Domain separator used by the historical poseidon2_sponge_t* KATs.
+DS = 1
 # Compile-time domain separator hardcoded into the Compression template
 # ("eprint.iacr.org/2025/1500+Pos2" interpreted as a field element)
 COMPRESSION_DS = 0x657072696E742E696163722E6F72672F323032352F313530302B506F7332
@@ -226,8 +228,14 @@ def main():
     consts = load_constants()
     self_check(consts)
 
-    rng = random.Random(SEED)
-    fe = lambda: rng.randrange(P)
+    # The retained corpora were committed from two historical generator
+    # layouts. Keep both streams so regenerating KATs remains byte-stable.
+    legacy_rng = random.Random(SEED)
+    current_rng = random.Random(SEED)
+
+    def fe(rng):
+        return rng.randrange(P)
+
     KAT_DIR.mkdir(exist_ok=True)
 
     files = {}
@@ -235,18 +243,26 @@ def main():
         n = t  # 2 permutations, final block partially filled
         sponge_kats, comp_kats = [], []
         for _ in range(KATS_PER_FILE):
-            inputs = [fe() for _ in range(n)]
-            ds = fe()
+            inputs = [fe(legacy_rng) for _ in range(n)]
             sponge_kats.append(
                 {
                     "in": [hexstr(x) for x in inputs],
-                    "ds": hexstr(ds),
-                    "out": hexstr(poseidon2_sponge(inputs, t, ds, consts[t])),
+                    "out": hexstr(poseidon2_sponge(inputs, t, DS, consts[t])),
                 }
             )
 
-            q = [fe() for _ in range(n)]
-            alpha = fe()
+            # Advance past the removed runtime-DS sponge, compression, and
+            # runtime-DS compression vectors from the original generator.
+            for _ in range(3 * n + 4):
+                fe(legacy_rng)
+
+            # Compression vectors were regenerated after runtime-DS
+            # compression was removed, so they use the later stream layout.
+            for _ in range(2 * n + 1):
+                fe(current_rng)
+
+            q = [fe(current_rng) for _ in range(n)]
+            alpha = fe(current_rng)
             beta = poseidon2_sponge(q, t, COMPRESSION_DS, consts[t])
             comp_kats.append(
                 {
@@ -262,8 +278,8 @@ def main():
 
     uhf_kats = []
     for _ in range(KATS_PER_FILE):
-        x = [fe() for _ in range(UHF_N)]
-        alpha, beta = fe(), fe()
+        x = [fe(legacy_rng) for _ in range(UHF_N)]
+        alpha, beta = fe(legacy_rng), fe(legacy_rng)
         uhf_kats.append(
             {
                 "alpha": hexstr(alpha),
@@ -274,17 +290,21 @@ def main():
         )
     files["uhf.json"] = uhf_kats
 
+    # The Merkle vectors use the later stream after its UHF draws.
+    for _ in range(KATS_PER_FILE * (UHF_N + 2)):
+        fe(current_rng)
+
     def merkle_kat(depth):
-        leaf = fe()
-        index_bits = [rng.randrange(2) for _ in range(depth)] + [0] * (
+        leaf = fe(current_rng)
+        index_bits = [current_rng.randrange(2) for _ in range(depth)] + [0] * (
             MERKLE_MAX_DEPTH - depth
         )
-        hash_path = [fe() for _ in range(MERKLE_MAX_DEPTH)]
+        hash_path = [fe(current_rng) for _ in range(MERKLE_MAX_DEPTH)]
         return {
             "leaf": hexstr(leaf),
             "depth": depth,
-            "indexBits": index_bits,
-            "hashPath": [hexstr(x) for x in hash_path],
+            "index_bits": index_bits,
+            "hash_path": [hexstr(x) for x in hash_path],
             "out": hexstr(merkle_root(leaf, index_bits, hash_path, depth, consts[2])),
         }
 
