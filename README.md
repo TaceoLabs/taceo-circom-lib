@@ -32,7 +32,10 @@ Within the library, circuits reference each other by bare filename (e.g. `poseid
 
 - `poseidon2.circom`: Poseidon2 permutation over the BN254 scalar field for state sizes t ∈ {2, 3, 4, 8, 12, 16}
 - `compression.circom`: public input compression via [hybrid compression](https://eprint.iacr.org/2025/1500): a Poseidon2-based sponge (`Poseidon2Sponge`, with the domain separator as a runtime signal), a universal hash function (`UHF`), and `Compression` combining both with a fixed domain separator
+- `mpc.circom`: public entry point for the MPC compiler intrinsics in `precomputations.circom`, `injections.circom`, and `reveal.circom`
 - `precomputations.circom`: `TACEO_PRECOMPUTATION_*` wrappers around Poseidon2 and circomlib primitives (`Num2Bits`, `IsZero`, `AliasCheck`), for MPC-proving
+- `injections.circom`: `TACEO_INJECTED_Poseidon2`, whose trace is supplied to the MPC runtime by the host
+- `reveal.circom`: `TACEO_REVEAL`, an explicit declassification operation for MPC-proving
 - `babyjubjub.circom`: BabyJubJub curve operations (curve/subgroup checks, scalar multiplication, ...)
 - `eddsa_poseidon2.circom`: EdDSA signature verification using Poseidon2
 - `binary_merkle_root.circom`: binary Merkle root from a membership proof (adapted from [zk-kit](https://github.com/zk-kit/zk-kit.circom), using Poseidon2 in compression mode), with dynamic depth up to `MAX_DEPTH` and enforcement that path bits (`indexBits`) beyond the depth are zero. There is no domain separation between tree layers; domain-separate leaves before passing them in (see the note in the circuit)
@@ -41,7 +44,9 @@ The `poseidon2`, `eddsa_poseidon2`, and `babyjubjub` circuits are pulled from th
 
 ### MPC-proving
 
-`precomputations.circom` provides `TACEO_PRECOMPUTATION_*` wrappers around Poseidon2 and circomlib primitives (`Num2Bits`, `IsZero`, `AliasCheck`) for use with the TACEO MPC-proving stack.
+Applications can include `mpc.circom` to access all TACEO MPC compiler intrinsics. `precomputations.circom` provides the `TACEO_PRECOMPUTATION_*` runtime wrappers around Poseidon2 and circomlib primitives (`Num2Bits`, `IsZero`, `AliasCheck`).
+
+`TACEO_INJECTED_Poseidon2(T)` has the same Circom inputs, outputs, and constraints as `TACEO_PRECOMPUTATION_Poseidon2(T)`, but tells the MPC compiler that the host supplies its trace up front. `TACEO_REVEAL(n)` is an identity operation in standard Circom and explicitly declassifies its inputs to every MPC party when compiled by the TACEO MPC compiler. Every reveal site is therefore a security-sensitive circuit-authoring decision.
 
 ### Public input compression
 
