@@ -34,24 +34,24 @@ template ExternalMatMul4 {
     signal input in[4];
     signal output out[4];
 
-    signal double_in1 <== 2 * in[1];
-    signal double_in3 <== 2 * in[3];
+    signal doubleIn1 <== 2 * in[1];
+    signal doubleIn3 <== 2 * in[3];
 
-    signal t_0 <== in[0] + in[1];
-    signal t_1 <== in[2] + in[3];
+    signal t0 <== in[0] + in[1];
+    signal t1 <== in[2] + in[3];
 
-    signal quad_t_0 <== 4 * t_0;
-    signal quad_t_1 <== 4 * t_1;
+    signal quadT0 <== 4 * t0;
+    signal quadT1 <== 4 * t1;
 
-    signal t_2 <== double_in1 + t_1;
-    signal t_3 <== double_in3 + t_0;
-    signal t_4 <== quad_t_1 + t_3;
-    signal t_5 <== quad_t_0 + t_2;
+    signal t2 <== doubleIn1 + t1;
+    signal t3 <== doubleIn3 + t0;
+    signal t4 <== quadT1 + t3;
+    signal t5 <== quadT0 + t2;
 
-    out[0] <== t_3 + t_5;
-    out[1] <== t_5;
-    out[2] <== t_2 + t_4;
-    out[3] <== t_4;
+    out[0] <== t3 + t5;
+    out[1] <== t5;
+    out[2] <== t2 + t4;
+    out[3] <== t4;
 }
 
 template ExternalMatMulT(t) {
@@ -65,10 +65,10 @@ template ExternalMatMulT(t) {
     } else if (t== 4) {
         out <== ExternalMatMul4()(in);
     } else {
-        var amount_mds = t / 4;
-        component mds[amount_mds];
+        var amountMds = t / 4;
+        component mds[amountMds];
 
-        for (var i = 0;i<amount_mds;i++) {
+        for (var i = 0;i<amountMds;i++) {
             var offset = 4 * i;
             mds[i] = ExternalMatMul4();
             for (var j = 0;j<4;j++) {
@@ -78,14 +78,14 @@ template ExternalMatMulT(t) {
 
         component accs[4];
         for (var l = 0;l<4;l++) {
-            accs[l] = Acc(amount_mds);
+            accs[l] = Acc(amountMds);
             accs[l].in[0] <== mds[0].out[l];
-            for (var j = 1;j<amount_mds;j++) {
+            for (var j = 1;j<amountMds;j++) {
                 accs[l].in[j] <== mds[j].out[l];
             }
         }
 
-        for (var i = 0;i<amount_mds;i++) {
+        for (var i = 0;i<amountMds;i++) {
             for (var j = 0;j<4;j++) {
                 out[i * 4 + j] <== mds[i].out[j] + accs[j].out;
             }
@@ -128,7 +128,7 @@ template InternalMatMulT(t) {
         // so we opted to call this function each round. This may add some
         // overhead with our standard witness extension, but the graph
         // compiler hopefully eliminates this call completely.
-        var diag[t] = load_diag(t);
+        var diag[t] = loadDiag(t);
         signal acc <== Acc(t)(in);
         for (var i = 0;i<t;i++) {
             out[i] <== in[i] * diag[i] + acc;
@@ -136,12 +136,12 @@ template InternalMatMulT(t) {
     }
 }
 
-template Sbox_e() {
+template SboxE() {
     signal input in;
     signal output out;
     signal square <== in * in;
-    signal pow_4 <== square * square;
-    out <== pow_4 * in;
+    signal pow4 <== square * square;
+    out <== pow4 * in;
 }
 
 template Sbox(t) {
@@ -149,22 +149,22 @@ template Sbox(t) {
     signal output out[t];
 
     for (var i = 0;i<t;i++) {
-        out[i] <== Sbox_e()(in[i]);
+        out[i] <== SboxE()(in[i]);
     }
 }
 
 template FullRound(t) {
     signal input in[t];
-    signal input RC[t];
+    signal input rc[t];
     signal output out[t];
 
     // add full round constants
-    signal linear_layer[t];
+    signal linearLayer[t];
     for (var i=0;i<t;i++) {
-        linear_layer[i] <== in[i] + RC[i];
+        linearLayer[i] <== in[i] + rc[i];
     }
     // apply sbox for all elements
-    signal sbox[t] <== Sbox(t)(linear_layer);
+    signal sbox[t] <== Sbox(t)(linearLayer);
 
     // apply external mds matrix
     out <== ExternalMatMulT(t)(sbox);
@@ -172,22 +172,22 @@ template FullRound(t) {
 
 template PartialRound(t) {
     signal input in[t];
-    signal input RC;
+    signal input rc;
     signal output out[t];
 
     // add rc to first element
-    signal linear_layer <== in[0] + RC;
+    signal linearLayer <== in[0] + rc;
 
     // apply sbox to first element
-    signal sbox <== Sbox_e()(linear_layer);
+    signal sbox <== SboxE()(linearLayer);
 
     // apply internal mds matrix
-    component internal_mm = InternalMatMulT(t);
-    internal_mm.in[0] <== sbox;
+    component internalMm = InternalMatMulT(t);
+    internalMm.in[0] <== sbox;
     for (var i = 1;i<t;i++) {
-        internal_mm.in[i] <== in[i];
+        internalMm.in[i] <== in[i];
     }
-    out <== internal_mm.out;
+    out <== internalMm.out;
 }
 
 template Poseidon2(t) {
@@ -198,32 +198,32 @@ template Poseidon2(t) {
     signal output out[t];
 
     // load amount partial rounds
-    var partial_rounds = amount_partial_rounds(t);
+    var partialRounds = amountPartialRounds(t);
 
     // load round constants
-    var rc_full1[4][t] = load_rc_full1(t);
-    var rc_partial[partial_rounds] = load_rc_partial(t);
-    var rc_full2[4][t] = load_rc_full2(t);
+    var rcFull1[4][t] = loadRcFull1(t);
+    var rcPartial[partialRounds] = loadRcPartial(t);
+    var rcFull2[4][t] = loadRcFull2(t);
 
-    signal state[9+partial_rounds][t];
+    signal state[9+partialRounds][t];
 
     // Outer matrix mul
     state[0] <== ExternalMatMulT(t)(in);
 
     // First 4 full rounds
     for (var i = 0;i<4;i++) {
-        state[i+1] <== FullRound(t)(state[i], rc_full1[i]);
+        state[i+1] <== FullRound(t)(state[i], rcFull1[i]);
     }
 
     // Partial Rounds
-    for (var i = 0;i<partial_rounds;i++) {
-        state[i+5] <== PartialRound(t)(state[i+4], rc_partial[i]);
+    for (var i = 0;i<partialRounds;i++) {
+        state[i+5] <== PartialRound(t)(state[i+4], rcPartial[i]);
     }
 
     // Second 4 full rounds
     for (var i = 0;i<4;i++) {
-        state[i+5+partial_rounds] <== FullRound(t)(state[i+4+partial_rounds], rc_full2[i]);
+        state[i+5+partialRounds] <== FullRound(t)(state[i+4+partialRounds], rcFull2[i]);
     }
 
-    out <== state[8+partial_rounds];
+    out <== state[8+partialRounds];
 }

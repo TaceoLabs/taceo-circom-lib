@@ -35,7 +35,7 @@ Within the library, circuits reference each other by bare filename (e.g. `poseid
 - `precomputations.circom`: `TACEO_PRECOMPUTATION_*` wrappers around Poseidon2 and circomlib primitives (`Num2Bits`, `IsZero`, `AliasCheck`), for MPC-proving
 - `babyjubjub.circom`: BabyJubJub curve operations (curve/subgroup checks, scalar multiplication, ...)
 - `eddsa_poseidon2.circom`: EdDSA signature verification using Poseidon2
-- `binary_merkle_root.circom`: binary Merkle root from a membership proof (adapted from [zk-kit](https://github.com/zk-kit/zk-kit.circom), using Poseidon2 in compression mode), with dynamic depth up to `MAX_DEPTH` and enforcement that path bits beyond the depth are zero. There is no domain separation between tree layers; domain-separate leaves before passing them in (see the note in the circuit)
+- `binary_merkle_root.circom`: binary Merkle root from a membership proof (adapted from [zk-kit](https://github.com/zk-kit/zk-kit.circom), using Poseidon2 in compression mode), with dynamic depth up to `MAX_DEPTH` and enforcement that path bits (`indexBits`) beyond the depth are zero. There is no domain separation between tree layers; domain-separate leaves before passing them in (see the note in the circuit)
 
 The `poseidon2`, `eddsa_poseidon2`, and `babyjubjub` circuits are pulled from the audited repository for [TACEO:OPRF](https://github.com/TaceoLabs/oprf-circom/).
 

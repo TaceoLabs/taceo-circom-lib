@@ -2,7 +2,7 @@
   {
     "leaf": "0x143eeb229e56377d8e8e2d24be3f3b9a0c4af40b7a6949a5c1bdb135056e7461",
     "depth": 0,
-    "index_bits": [
+    "indexBits": [
       0,
       0,
       0,
@@ -14,7 +14,7 @@
       0,
       0
     ],
-    "hash_path": [
+    "hashPath": [
       "0x0d9a26140ac90d0b4325397a0c4b91123a19175e18013ecafb2122ea8ef8d12d",
       "0x123e49d5e958bfc111d35988b3680dd5e5b88b7122557a750735c630cf52f643",
       "0x0e74ef1749402b8a27a2abe0baf02a970134a695a33ad0df0c9f5096330329ee",
@@ -31,7 +31,7 @@
   {
     "leaf": "0x19fec079d6e02050f5abc02cc8f38bb2690a3a6272d7ea3de786ba25465fec37",
     "depth": 0,
-    "index_bits": [
+    "indexBits": [
       0,
       0,
       0,
@@ -43,7 +43,7 @@
       0,
       0
     ],
-    "hash_path": [
+    "hashPath": [
       "0x10e0012457047e3fe6779cda54d1306f76f44f0ac5ab16804fcae4093462e750",
       "0x196e3654a51d0bd04618270e571d8101cd062f83bcf6194dd0847e790a2b2217",
       "0x299a2812c730bc7ca4ba2b1dbb6eea50bcb4e713cabcaaa3aaa367763a9e470e",
@@ -60,7 +60,7 @@
   {
     "leaf": "0x04d7d8f911abd17b046eade45584499e7d470b91c39ba5277e7b028d9f147fed",
     "depth": 1,
-    "index_bits": [
+    "indexBits": [
       1,
       0,
       0,
@@ -72,7 +72,7 @@
       0,
       0
     ],
-    "hash_path": [
+    "hashPath": [
       "0x18feaa8ad751fc65623c0a67bd725f92969f17ad420849ce7ef81e3d3d16b0da",
       "0x25963492857b658828bb5bb81066bc626479cc2b88fb28ee67e364557234f2c5",
       "0x23651c0c94415c999ec76d48cd46576fde18eb3281045018fab1355388831e1f",
@@ -89,7 +89,7 @@
   {
     "leaf": "0x1d0035f09bd7c738ebc1e5d772a28e518a41e56ee8034fef71e63c53f2021a38",
     "depth": 1,
-    "index_bits": [
+    "indexBits": [
       1,
       0,
       0,
@@ -101,7 +101,7 @@
       0,
       0
     ],
-    "hash_path": [
+    "hashPath": [
       "0x28604910306d26453dd860011eb50b7d2248eda59fa950f6ebfdf514e8a06f31",
       "0x02b2f8c1beed83ba7b60c229612a3240de6c93aeb20d706bfbf2c7342d93fe70",
       "0x0ec61f0924aaf5422112cb7916b3a1cd56d89b73310d10dbf90a56235dcc5313",
@@ -118,7 +118,7 @@
   {
     "leaf": "0x244035b535a3bea07ab57cddd15c16a562879ad3c5c342a888f229dbb598bb21",
     "depth": 5,
-    "index_bits": [
+    "indexBits": [
       0,
       0,
       0,
@@ -130,7 +130,7 @@
       0,
       0
     ],
-    "hash_path": [
+    "hashPath": [
       "0x0412fdfbd1332504959e6947ee2c394de783e1d9b43ad6a35e93cef6262c95b0",
       "0x17838eca9004cbe17310ffaad37794e35f774d142809ba9c02c315ebbfc84a12",
       "0x0c992833e8f33edd608aa8f4377fc8dc6149d7aefa732b83d2fffac9321cc8e3",
@@ -147,7 +147,7 @@
   {
     "leaf": "0x04ccf7cc9f22cff851cfa644d1a81d0e808300a5aeeaa0b45bb4dc5a216f7cd2",
     "depth": 5,
-    "index_bits": [
+    "indexBits": [
       1,
       1,
       0,
@@ -159,7 +159,7 @@
       0,
       0
     ],
-    "hash_path": [
+    "hashPath": [
       "0x0039b067f5999a37d16c733ea12d664c960002aeb66298871dae4fe875d103dd",
       "0x1301a462ab3addddc2959711e9a5418c87eafbccad6f50485f392bcda8df54c0",
       "0x253ff5b0ecf16bbb821eef406e3c5b6c6135fb40b09b65b019b934b975155e0f",
@@ -176,7 +176,7 @@
   {
     "leaf": "0x05260f983cf51fb9e0ed60a3d2b2ded039c665b92b11da67c55542b9fce66415",
     "depth": 10,
-    "index_bits": [
+    "indexBits": [
       1,
       1,
       0,
@@ -188,7 +188,7 @@
       0,
       0
     ],
-    "hash_path": [
+    "hashPath": [
       "0x0f0da961951ae1f3212f3cfcf679d67905d438456e38c79115899edce70f9ee5",
       "0x1321edd40b4bfc12ce13a4f6e88e0e3bd34de35de6e030b31f9bc00c74c2f350",
       "0x1186e62020f7a46bcd32350ffc5d9837f31fbe3317481018ab54f4c79f3404a2",
@@ -205,7 +205,7 @@
   {
     "leaf": "0x257e5caded7e84bb0d9883a7d9ab6d6ec7e5a9a8b5639b605717d4a5f13b22aa",
     "depth": 10,
-    "index_bits": [
+    "indexBits": [
       0,
       1,
       0,
@@ -217,7 +217,7 @@
       1,
       1
     ],
-    "hash_path": [
+    "hashPath": [
       "0x0f317637d38d3f8cabc9a5f69d104ddb724fe48cd7af1e11636c51df66ba6326",
       "0x1bf79000e900ca74acd58dddd15ee3f56af3fa2d660eadb15cd239387ff406cc",
       "0x2b2e1357eace5e07fe58e6cd5c466b7758683dd773af155fb87e8545aebad7c6",

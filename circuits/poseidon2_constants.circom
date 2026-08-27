@@ -1,6 +1,6 @@
 pragma circom 2.2.2;
 
-function amount_partial_rounds(t) {
+function amountPartialRounds(t) {
     if (t<=4) {
         return 56;
     } else {
@@ -8,7 +8,7 @@ function amount_partial_rounds(t) {
     }
 }
 
-function load_diag(t) {
+function loadDiag(t) {
      if (t == 4) {
        return
     [0x10dc6e9c006ea38b04b1e03b4bd9490c0d03f98929ca1d7fb56821fd19d3b6e7,
@@ -65,7 +65,7 @@ function load_diag(t) {
     }
 }
 
-function load_rc_full1(t) {
+function loadRcFull1(t) {
     if (t == 2) {
         return [
             [
@@ -316,7 +316,7 @@ function load_rc_full1(t) {
     }
 }
 
-function load_rc_partial(t) {
+function loadRcPartial(t) {
     if (t == 2) {
         return [
             0x0252ba5f6760bfbdfd88f67f8175e3fd6cd1c431b099b6bb2d108e7b445bb1b9,
@@ -678,7 +678,7 @@ function load_rc_partial(t) {
     }
 }
 
-function load_rc_full2(t) {
+function loadRcFull2(t) {
     if (t == 2) {
         return [
             [
