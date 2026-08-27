@@ -6,10 +6,10 @@ include "babyjubjub.circom";
 template BabyJubJubIdentityTest() {
     signal input p[2];
 
-    BabyJubJubPoint() { twisted_edwards } in_p;
-    in_p.x <== p[0];
-    in_p.y <== p[1];
-    BabyJubJubCheckIsIdentity()(in_p);
+    BabyJubJubPoint() { twistedEdwards } inP;
+    inP.x <== p[0];
+    inP.y <== p[1];
+    BabyJubJubCheckIsIdentity()(inP);
 }
 
 component main = BabyJubJubIdentityTest();

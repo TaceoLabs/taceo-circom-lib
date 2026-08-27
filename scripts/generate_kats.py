@@ -79,10 +79,10 @@ def extract_branches(body):
 def load_constants():
     source = CONSTANTS_FILE.read_text()
     consts = {}
-    diag = extract_branches(extract_function_body(source, "load_diag"))
-    full1 = extract_branches(extract_function_body(source, "load_rc_full1"))
-    partial = extract_branches(extract_function_body(source, "load_rc_partial"))
-    full2 = extract_branches(extract_function_body(source, "load_rc_full2"))
+    diag = extract_branches(extract_function_body(source, "loadDiag"))
+    full1 = extract_branches(extract_function_body(source, "loadRcFull1"))
+    partial = extract_branches(extract_function_body(source, "loadRcPartial"))
+    full2 = extract_branches(extract_function_body(source, "loadRcFull2"))
     for t in STATE_SIZES:
         consts[t] = {
             "diag": diag.get(t),  # None for t=2,3 (no diagonal needed)
@@ -283,8 +283,8 @@ def main():
         return {
             "leaf": hexstr(leaf),
             "depth": depth,
-            "index_bits": index_bits,
-            "hash_path": [hexstr(x) for x in hash_path],
+            "indexBits": index_bits,
+            "hashPath": [hexstr(x) for x in hash_path],
             "out": hexstr(merkle_root(leaf, index_bits, hash_path, depth, consts[2])),
         }
 

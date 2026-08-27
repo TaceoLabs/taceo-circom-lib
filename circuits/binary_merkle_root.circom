@@ -20,7 +20,7 @@ include "circomlib/circuits/comparators.circom";
 // may be equal to or less than the static maximum depth.
 //
 // NOTE: This circuit will successfully verify `out = 0` for `depth > MAX_DEPTH`.
-// Furthermore, it is *not* enforced that index_bits are 0 or 1. This needs to
+// Furthermore, it is *not* enforced that indexBits are 0 or 1. This needs to
 // be done elsewhere in the circuit.
 // Make sure to enforce `depth <= MAX_DEPTH` outside the circuit.
 //
@@ -33,8 +33,8 @@ include "circomlib/circuits/comparators.circom";
 // as internal node values.
 template BinaryMerkleRoot(MAX_DEPTH) {
     signal input leaf;
-    signal input index_bits[MAX_DEPTH];
-    signal input hash_path[MAX_DEPTH];
+    signal input indexBits[MAX_DEPTH];
+    signal input hashPath[MAX_DEPTH];
     signal input depth;
     signal output out;
 
@@ -43,48 +43,48 @@ template BinaryMerkleRoot(MAX_DEPTH) {
 
     signal roots[MAX_DEPTH];
     signal mul[MAX_DEPTH];
-    signal hash_left[MAX_DEPTH];
-    signal hash_right[MAX_DEPTH];
+    signal hashLeft[MAX_DEPTH];
+    signal hashRight[MAX_DEPTH];
     var root = 0;
 
-    signal is_depth[MAX_DEPTH + 1];
-    signal should_be_zeros[MAX_DEPTH];
+    signal isDepth[MAX_DEPTH + 1];
+    signal shouldBeZeros[MAX_DEPTH];
 
     for (var i = 0; i < MAX_DEPTH; i++) {
-        var isDepth = IsEqual()([depth, i]);
-        is_depth[i] <== isDepth;
-        roots[i] <== isDepth * nodes[i];
+        var isDepthVal = IsEqual()([depth, i]);
+        isDepth[i] <== isDepthVal;
+        roots[i] <== isDepthVal * nodes[i];
         root += roots[i];
 
-        var path_bit = index_bits[i];
-        var path_hash = hash_path[i];
+        var pathBit = indexBits[i];
+        var pathHash = hashPath[i];
 
-        mul[i] <== path_bit * (path_hash - nodes[i]);
-        hash_left[i] <== mul[i] + nodes[i];
-        hash_right[i] <== path_hash - mul[i];
+        mul[i] <== pathBit * (pathHash - nodes[i]);
+        hashLeft[i] <== mul[i] + nodes[i];
+        hashRight[i] <== pathHash - mul[i];
 
        // Compression mode
-        var poseidon_result[2] = TACEO_PRECOMPUTATION_Poseidon2(2)([hash_left[i], hash_right[i]]);
-        nodes[i + 1] <== poseidon_result[0] + hash_left[i];
+        var poseidonResult[2] = TACEO_PRECOMPUTATION_Poseidon2(2)([hashLeft[i], hashRight[i]]);
+        nodes[i + 1] <== poseidonResult[0] + hashLeft[i];
     }
 
-    var isDepth = IsEqual()([depth, MAX_DEPTH]);
-    is_depth[MAX_DEPTH] <== isDepth;
+    var isDepthVal = IsEqual()([depth, MAX_DEPTH]);
+    isDepth[MAX_DEPTH] <== isDepthVal;
 
-    out <== root + isDepth * nodes[MAX_DEPTH];
+    out <== root + isDepthVal * nodes[MAX_DEPTH];
 
     // For our use case we need to enforce that the index is in range. We do this by checking that for all bits greater than the depth, the index bit is zero.
     // We can reuse the isDepth signal from above to do this.
     // The following construction translates the one-hot vector isDepth to a vector where each element i is 1 starting with the 1 in isDepth and 0 before.
     // E.g., [0,0,1,0,0] is translated to [0,0,1,1,1].
-    // Thus a constraint index_bits[i] * should_be_zeros[i] === 0 enforces that all bits in index_bits after the depth are zero.
+    // Thus a constraint indexBits[i] * shouldBeZeros[i] === 0 enforces that all bits in indexBits after the depth are zero.
     for (var i = 0; i < MAX_DEPTH; i++) {
         if (i == 0) {
-            should_be_zeros[i] <== is_depth[i];
+            shouldBeZeros[i] <== isDepth[i];
         } else {
-            should_be_zeros[i] <== is_depth[i] + should_be_zeros[i-1];
+            shouldBeZeros[i] <== isDepth[i] + shouldBeZeros[i-1];
         }
-        should_be_zeros[i] * index_bits[i] === 0;
+        shouldBeZeros[i] * indexBits[i] === 0;
     }
 }
 

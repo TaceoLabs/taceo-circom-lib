@@ -41,11 +41,11 @@ bus BabyJubJubScalarField {
 //
 // where a = 168700 and d = 168696.
 //
-// If the check succeeds, outputs a BabyJubJubPoint bus tagged twisted_edwards.
+// If the check succeeds, outputs a BabyJubJubPoint bus tagged twistedEdwards.
 template BabyJubJubCheck() {
     signal input x;
     signal input y;
-    output BabyJubJubPoint() { twisted_edwards } p;
+    output BabyJubJubPoint() { twistedEdwards } p;
     BabyCheck()(x,y);
     p.x <== x;
     p.y <== y;
@@ -60,16 +60,16 @@ template BabyJubJubCheck() {
 //
 // Additionally it is checked if the point lies in the prime-order subgroup of BabyJubJub.
 //
-// If the check succeeds, outputs a BabyJubJubPoint bus tagged twisted_edwards_in subgroup.
+// If the check succeeds, outputs a BabyJubJubPoint bus tagged twistedEdwardsInSubgroup.
 // This template is the canonical way to obtain a point that can be safely used with the other templates defined in this file.
 //
 // Use this method to construct BabyJubJub points in Twisted Edwards form unless you explicitly know what you are doing.
 template BabyJubJubCheckAndSubgroupCheck() {
     signal input x;
     signal input y;
-    output BabyJubJubPoint() { twisted_edwards_in_subgroup } p;
-    BabyJubJubPoint() { twisted_edwards } p_on_curve <== BabyJubJubCheck()(x,y);
-    BabyJubJubCheckInCorrectSubgroup()(p_on_curve);
+    output BabyJubJubPoint() { twistedEdwardsInSubgroup } p;
+    BabyJubJubPoint() { twistedEdwards } pOnCurve <== BabyJubJubCheck()(x,y);
+    BabyJubJubCheckInCorrectSubgroup()(pOnCurve);
     p.x <== x;
     p.y <== y;
 }
@@ -77,8 +77,8 @@ template BabyJubJubCheckAndSubgroupCheck() {
 // Computes the negation -P of a point P in Twisted Edwards form.
 // Negation is performed by negating the x-coordinate and keeping y unchanged.
 template BabyJubJubNeg() {
-    input BabyJubJubPoint() { twisted_edwards_in_subgroup } in;
-    output BabyJubJubPoint() { twisted_edwards_in_subgroup } out;
+    input BabyJubJubPoint() { twistedEdwardsInSubgroup } in;
+    output BabyJubJubPoint() { twistedEdwardsInSubgroup } out;
     out.x <== -in.x;
     out.y <== in.y;
 }
@@ -86,15 +86,15 @@ template BabyJubJubNeg() {
 // Computes the subtraction P - Q for two points in Twisted Edwards form.
 // Implemented as P + (-Q).
 template BabyJubJubSub() {
-    input BabyJubJubPoint() { twisted_edwards_in_subgroup } lhs;
-    input BabyJubJubPoint() { twisted_edwards_in_subgroup } rhs;
-    output BabyJubJubPoint() { twisted_edwards_in_subgroup } out;
+    input BabyJubJubPoint() { twistedEdwardsInSubgroup } lhs;
+    input BabyJubJubPoint() { twistedEdwardsInSubgroup } rhs;
+    output BabyJubJubPoint() { twistedEdwardsInSubgroup } out;
 
-    BabyJubJubPoint() neg_rhs <== BabyJubJubNeg()(rhs);
+    BabyJubJubPoint() negRhs <== BabyJubJubNeg()(rhs);
 
-    signal (res_x, res_y) <== BabyAdd()(lhs.x,lhs.y,neg_rhs.x,neg_rhs.y);
-    out.x <== res_x;
-    out.y <== res_y;
+    signal (resX, resY) <== BabyAdd()(lhs.x,lhs.y,negRhs.x,negRhs.y);
+    out.x <== resX;
+    out.y <== resY;
 }
 
 // Performs fixed-base scalar multiplication e·G, where G is the BabyJubJub generator.
@@ -102,7 +102,7 @@ template BabyJubJubSub() {
 template BabyJubJubScalarGenerator() {
     // do with generator (scalarmul fix)
     input BabyJubJubScalarField() e;
-    output BabyJubJubPoint() { twisted_edwards_in_subgroup } out;
+    output BabyJubJubPoint() { twistedEdwardsInSubgroup } out;
 
     out <== BabyJubJubScalarGeneratorBits()(Num2Bits(251)(e.f));
 }
@@ -112,7 +112,7 @@ template BabyJubJubScalarGenerator() {
 template BabyJubJubScalarGeneratorBits() {
     // do with generator (scalarmul fix)
     signal input e[251];
-    output BabyJubJubPoint() { twisted_edwards_in_subgroup } out;
+    output BabyJubJubPoint() { twistedEdwardsInSubgroup } out;
     // The generator of BabyJubJub
     var GENERATOR[2] = [
         5299619240641551281634865583518297030282874472190772894086521144482721001553,
@@ -130,7 +130,7 @@ template BabyJubJubScalarGeneratorBits() {
 // Precondition: This template assumes P is on the curve and belongs to the correct subgroup. It does not perform any checks to verify these conditions.
 template BabyJubJubScalarMulFix(BASE) {
     input BabyJubJubScalarField() e;
-    output BabyJubJubPoint() { twisted_edwards_in_subgroup } out;
+    output BabyJubJubPoint() { twistedEdwardsInSubgroup } out;
 
     out <== BabyJubJubScalarMulFixBits(BASE)(Num2Bits(251)(e.f));
 }
@@ -141,7 +141,7 @@ template BabyJubJubScalarMulFix(BASE) {
 // Precondition: This template assumes P is on the curve and belongs to the correct subgroup. It does not perform any checks to verify these conditions.
 template BabyJubJubScalarMulFixBits(BASE) {
     signal input e[251];
-    output BabyJubJubPoint() { twisted_edwards_in_subgroup } out;
+    output BabyJubJubPoint() { twistedEdwardsInSubgroup } out;
     signal result[2] <== EscalarMulFix(251, BASE)(e);
     out.x <== result[0];
     out.y <== result[1];
@@ -151,11 +151,11 @@ template BabyJubJubScalarMulFixBits(BASE) {
 // Performs scalar multiplication e·P for an arbitrary point P in Twisted Edwards form.
 //
 // Precondition: This template assumes P is on the curve and belongs to the correct subgroup.
-// It does not perform any checks to verify these conditions. It tries to ensure this by requiring the input point to be tagged as twisted_edwards_in_subgroup.
+// It does not perform any checks to verify these conditions. It tries to ensure this by requiring the input point to be tagged as twistedEdwardsInSubgroup.
 template BabyJubJubScalarMul() {
     input BabyJubJubScalarField() e;
-    input BabyJubJubPoint() { twisted_edwards_in_subgroup } p;
-    output BabyJubJubPoint() { twisted_edwards_in_subgroup } out;
+    input BabyJubJubPoint() { twistedEdwardsInSubgroup } p;
+    output BabyJubJubPoint() { twistedEdwardsInSubgroup } out;
 
     out <== BabyJubJubScalarMulBits()(Num2Bits(251)(e.f), p);
 }
@@ -163,11 +163,11 @@ template BabyJubJubScalarMul() {
 // Performs scalar multiplication e·P for an arbitrary point P in Twisted Edwards form.
 //
 // Precondition: This template assumes P is on the curve and belongs to the correct subgroup.
-// It does not perform any checks to verify these conditions. It tries to ensure this by requiring the input point to be tagged as twisted_edwards_in_subgroup.
+// It does not perform any checks to verify these conditions. It tries to ensure this by requiring the input point to be tagged as twistedEdwardsInSubgroup.
 template BabyJubJubScalarMulBits() {
     signal input e[251];
-    input BabyJubJubPoint() { twisted_edwards_in_subgroup } p;
-    output BabyJubJubPoint() { twisted_edwards_in_subgroup } out;
+    input BabyJubJubPoint() { twistedEdwardsInSubgroup } p;
+    output BabyJubJubPoint() { twistedEdwardsInSubgroup } out;
 
     signal result[2] <== EscalarMulAny(251)(e, [p.x,p.y]);
     out.x <== result[0];
@@ -182,11 +182,11 @@ template BabyJubJubScalarMulBits() {
 // This is useful for verifiers that provide scalars in Fq: reducing them to Fr in-circuit would be more expensive than letting EscalarMulAny handle the modular reduction.
 //
 // Precondition: This template assumes P is on the curve and belongs to the correct subgroup.
-// It does not perform any checks to verify these conditions. It tries to ensure this by requiring the input point to be tagged as twisted_edwards_in_subgroup.
+// It does not perform any checks to verify these conditions. It tries to ensure this by requiring the input point to be tagged as twistedEdwardsInSubgroup.
 template BabyJubJubScalarMulBaseField() {
     input BabyJubJubBaseField() e;
-    input BabyJubJubPoint() { twisted_edwards_in_subgroup } p;
-    output BabyJubJubPoint() { twisted_edwards_in_subgroup } out;
+    input BabyJubJubPoint() { twistedEdwardsInSubgroup } p;
+    output BabyJubJubPoint() { twistedEdwardsInSubgroup } out;
 
     signal bits[254] <== Num2Bits_strict()(e.f);
     // performs the module reduction correctly
@@ -203,7 +203,7 @@ template BabyJubJubScalarMulBaseField() {
 template BabyJubJubIsInFr() {
     signal input in;
     output BabyJubJubScalarField() out;
-    output signal out_bits[251];
+    output signal outBits[251];
     // Prime order of BabyJubJub's scalar field Fr.
     var fr = 2736030358979909402780800718157159386076813972158567259200215660948447373041;
 
@@ -216,7 +216,7 @@ template BabyJubJubIsInFr() {
     compConstant.in[253] <== 0;
 
     for (var i=0; i<251; i++) {
-        out_bits[i] <== bits[i];
+        outBits[i] <== bits[i];
     }
 
     compConstant.out === 0;
@@ -228,11 +228,11 @@ template BabyJubJubIsInFr() {
 // We do not require tags here since this component is valid for all combinations of x/y.
 template BabyJubJubCheckNotIdentity() {
     input BabyJubJubPoint() p;
-    signal x_check <== IsZero()(p.x);
-    signal y_check <== IsZero()(1 - p.y);
+    signal xCheck <== IsZero()(p.x);
+    signal yCheck <== IsZero()(1 - p.y);
 
     // At least one of the is zero check must be 0. If both are one, it is the identity element which fails the constraint.
-    x_check * y_check === 0;
+    xCheck * yCheck === 0;
 }
 
 // Adds constraints to ensure a provided Twisted Edwards point is the identity element.
@@ -252,7 +252,7 @@ template BabyJubJubCheckIsIdentity() {
 //
 // We use a simple double and add ladder for this implementation since the scalar is fixed.
 template BabyJubJubCheckInCorrectSubgroup() {
-    input BabyJubJubPoint() { twisted_edwards } p;
+    input BabyJubJubPoint() { twistedEdwards } p;
     // Bit decomposition of Fr.
     var characteristic[251] = [1, 0, 0, 0, 1, 1, 1, 1, 0, 1, 1, 0, 0, 1, 0, 0, 1, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 1, 0, 0, 1, 0, 1, 0, 0, 1, 1, 1, 0, 1, 1, 1, 0, 0, 1, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1, 1, 1, 0, 0, 0, 0, 0, 1, 0, 0, 1, 0, 0, 1, 1, 1, 0, 0, 0, 0, 0, 1, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 1, 0, 1, 1, 1, 1, 1, 0, 0, 1, 1, 0, 1, 0, 1, 0, 1, 1, 1, 0, 1, 0, 0, 0, 0, 1, 1, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 1, 1, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 1, 1, 0, 1, 1, 0, 1, 0, 0, 0, 1, 0, 0, 0, 0, 0, 1, 0, 1, 0, 0, 0, 0, 1, 1, 1, 0, 1, 1, 0, 0, 1, 0, 1, 0, 0, 0, 0, 0, 0, 0, 1, 0, 1, 1, 0, 0, 0, 1, 1, 0, 0, 1, 0, 0, 0, 0, 1, 1, 1, 0, 1, 0, 0, 1, 1, 1, 0, 0, 1, 1, 1, 0, 0, 1, 0, 0, 0, 1, 0, 0, 1, 1, 0, 0, 0, 0, 0, 1, 1];
 
@@ -264,18 +264,18 @@ template BabyJubJubCheckInCorrectSubgroup() {
 
 
     for (var i = 249; i >= 0; i--) {
-        bitmuls[i] = BitElementTeMulFixSclalar(characteristic[i]);
-        bitmuls[i].add_in[0] <== p.x;
-        bitmuls[i].add_in[1] <== p.y;
+        bitmuls[i] = BitElementTeMulFixScalar(characteristic[i]);
+        bitmuls[i].addIn[0] <== p.x;
+        bitmuls[i].addIn[1] <== p.y;
         if (i == 249) {
-            bitmuls[i].dbl_in[0] <== p.x;
-            bitmuls[i].dbl_in[1] <== p.y;
+            bitmuls[i].dblIn[0] <== p.x;
+            bitmuls[i].dblIn[1] <== p.y;
         } else {
-            bitmuls[i].dbl_in[0] <== bitmuls[i+1].out[0];
-            bitmuls[i].dbl_in[1] <== bitmuls[i+1].out[1];
+            bitmuls[i].dblIn[0] <== bitmuls[i+1].out[0];
+            bitmuls[i].dblIn[1] <== bitmuls[i+1].out[1];
         }
     }
-    BabyJubJubPoint() { twisted_edwards } result;
+    BabyJubJubPoint() { twistedEdwards } result;
 
     result.x <== bitmuls[0].out[0];
     result.y <== bitmuls[0].out[1];
@@ -284,22 +284,22 @@ template BabyJubJubCheckInCorrectSubgroup() {
     BabyJubJubCheckIsIdentity()(result);
 }
 
-template BitElementTeMulFixSclalar(bit) {
+template BitElementTeMulFixScalar(bit) {
     assert(bit == 0 || bit == 1);
-    signal input dbl_in[2];
-    signal input add_in[2];
+    signal input dblIn[2];
+    signal input addIn[2];
     signal output out[2];
 
     component dbl = BabyDbl();
-    dbl.x <== dbl_in[0];
-    dbl.y <== dbl_in[1];
+    dbl.x <== dblIn[0];
+    dbl.y <== dblIn[1];
 
     if (bit == 1) {
         component add = BabyAdd();
         add.x1 <== dbl.xout;
         add.y1 <== dbl.yout;
-        add.x2 <== add_in[0];
-        add.y2 <== add_in[1];
+        add.x2 <== addIn[0];
+        add.y2 <== addIn[1];
         out[0] <== add.xout;
         out[1] <== add.yout;
     } else {

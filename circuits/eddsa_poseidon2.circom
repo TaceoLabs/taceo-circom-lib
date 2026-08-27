@@ -37,8 +37,8 @@ template EdDSAPoseidon2Verifier() {
     var i;
 
     // Ensure S < Subgroup Order
-    component s_range = BabyJubJubIsInFr();
-    s_range.in <== S;
+    component sRange = BabyJubJubIsInFr();
+    sRange.in <== S;
 
     // Calculate the h = H(R,A, msg)
     component hash = Poseidon2(8);
@@ -54,21 +54,21 @@ template EdDSAPoseidon2Verifier() {
     // We check that R is on the curve.
     // This is not strictly necessary for security, but since it only adds 3 constraints we do it anyway.
     // We do not require R to be in the correct subgroup, since it is only used in Twisted Edwards additions.
-    BabyJubJubPoint { twisted_edwards } R_p <== BabyJubJubCheck()(Rx, Ry);
+    BabyJubJubPoint { twistedEdwards } rP <== BabyJubJubCheck()(Rx, Ry);
     // We check that A is on the curve and in the correct subgroup.
-    BabyJubJubPoint { twisted_edwards_in_subgroup } A_p <== BabyJubJubCheckAndSubgroupCheck()(Ax, Ay);
+    BabyJubJubPoint { twistedEdwardsInSubgroup } aP <== BabyJubJubCheckAndSubgroupCheck()(Ax, Ay);
     // We check that A is not zero.
     component isZero = IsZero();
     isZero.in <== Ax;
     isZero.out === 0;
 
     // Calculate second part of the right side:  right2 = h*A
-    BabyJubJubBaseField() h_f;
-    h_f.f <== hash.out[1];
+    BabyJubJubBaseField() hF;
+    hF.f <== hash.out[1];
     // Precondition: A is in the correct subgroup, checked above.
     component mulAny = BabyJubJubScalarMulBaseField();
-    mulAny.e <== h_f;
-    mulAny.p <== A_p;
+    mulAny.e <== hF;
+    mulAny.p <== aP;
 
     // Compute the right side: right =  R + right2
     component addRight = BabyAdd();
@@ -79,7 +79,7 @@ template EdDSAPoseidon2Verifier() {
 
     // Calculate left side of equation left = S*B
     component mulFix = BabyJubJubScalarGeneratorBits();
-    mulFix.e <== s_range.out_bits;
+    mulFix.e <== sRange.outBits;
 
     // compute v = s*B - R - h*A = s*B - (R + h*A)
     component v = BabyAdd();

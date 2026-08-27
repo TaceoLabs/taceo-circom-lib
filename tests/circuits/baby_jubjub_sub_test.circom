@@ -8,13 +8,13 @@ template BabyJubJubSubTest() {
     signal input rhs[2];
     signal output out[2];
 
-    BabyJubJubPoint() { twisted_edwards_in_subgroup } lhs_p;
-    BabyJubJubPoint() { twisted_edwards_in_subgroup } rhs_p;
-    lhs_p.x <== lhs[0];
-    lhs_p.y <== lhs[1];
-    rhs_p.x <== rhs[0];
-    rhs_p.y <== rhs[1];
-    BabyJubJubPoint() { twisted_edwards_in_subgroup } result <== BabyJubJubSub()(lhs_p, rhs_p);
+    BabyJubJubPoint() { twistedEdwardsInSubgroup } lhsP;
+    BabyJubJubPoint() { twistedEdwardsInSubgroup } rhsP;
+    lhsP.x <== lhs[0];
+    lhsP.y <== lhs[1];
+    rhsP.x <== rhs[0];
+    rhsP.y <== rhs[1];
+    BabyJubJubPoint() { twistedEdwardsInSubgroup } result <== BabyJubJubSub()(lhsP, rhsP);
     out[0] <== result.x;
     out[1] <== result.y;
 }

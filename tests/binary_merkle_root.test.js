@@ -28,8 +28,8 @@ describe("BinaryMerkleRoot kats", function () {
       const witness = await circuit.calculateWitness(
         {
           leaf: BigInt(kat.leaf),
-          index_bits: kat.index_bits.map(BigInt),
-          hash_path: kat.hash_path.map(BigInt),
+          indexBits: kat.indexBits.map(BigInt),
+          hashPath: kat.hashPath.map(BigInt),
           depth: BigInt(kat.depth),
         },
         true,
@@ -41,16 +41,16 @@ describe("BinaryMerkleRoot kats", function () {
 
   it("rejects a non-zero index bit beyond depth", async () => {
     const kat = kats.find((k) => k.depth < MAX_DEPTH);
-    const index_bits = kat.index_bits.map(BigInt);
-    index_bits[MAX_DEPTH - 1] = 1n;
+    const indexBits = kat.indexBits.map(BigInt);
+    indexBits[MAX_DEPTH - 1] = 1n;
 
     let failed = false;
     try {
       await circuit.calculateWitness(
         {
           leaf: BigInt(kat.leaf),
-          index_bits,
-          hash_path: kat.hash_path.map(BigInt),
+          indexBits,
+          hashPath: kat.hashPath.map(BigInt),
           depth: BigInt(kat.depth),
         },
         true,

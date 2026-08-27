@@ -2,15 +2,15 @@ pragma circom 2.2.2;
 
 include "babyjubjub.circom";
 
-template Tester() {
+template CheckCorrectSubgroupTest() {
     signal input in[2];
     signal output out[2];
 
-    BabyJubJubPoint() { twisted_edwards } p;
+    BabyJubJubPoint() { twistedEdwards } p;
     p.x <== in[0];
     p.y <== in[1];
 
     BabyJubJubCheckInCorrectSubgroup()(p);
 }
 
-component main = Tester();
+component main = CheckCorrectSubgroupTest();
