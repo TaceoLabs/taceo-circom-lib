@@ -1,10 +1,6 @@
 const { wasm } = require("circom_tester");
 const path = require("path");
-
-const INCLUDE = [
-  path.join(__dirname, "../circuits"),
-  path.join(__dirname, "../node_modules"),
-];
+const { INCLUDE, POSEIDON2_T3_KAT0_OUT } = require("./common");
 
 describe("MPC intrinsics wiring", function () {
   this.timeout(60000);
@@ -16,13 +12,7 @@ describe("MPC intrinsics wiring", function () {
         { include: INCLUDE },
       );
       const witness = await circuit.calculateWitness({ in: [0, 1, 2] }, true);
-      await circuit.assertOut(witness, {
-        out: [
-          0x0bb61d24daca55eebcb1929a82650f328134334da98ea4f847f760054f4a3033n,
-          0x303b6f7c86d043bfcbcc80214f26a30277a15d3f74ca654992defe7ff8d03570n,
-          0x1ed25194542b12eef8617361c3ba7c52e660b145994427cc86296242cf766ec8n,
-        ],
-      });
+      await circuit.assertOut(witness, { out: POSEIDON2_T3_KAT0_OUT });
       await circuit.checkConstraints(witness);
     });
   });
