@@ -1,5 +1,5 @@
 pragma circom 2.2.2;
 
-include "compression.circom";
+include "compression_variants.circom";
 
-component main = Poseidon2Sponge(2, 2);
+component main = Poseidon2SpongeVariants(2, 2);
