@@ -24,6 +24,14 @@ include "precomputations.circom";
 /// Poseidon2 sponge hash of `q` and `gamma = UHF(alpha + beta, q)`; the contract
 /// recomputes `gamma` from `q`, its own `alpha`, and the prover-supplied `beta`. See
 /// https://eprint.iacr.org/2025/1500, Construction 2.
+///
+/// The sponge is domain-separated per the SAFE framework
+/// (https://eprint.iacr.org/2023/522): its capacity element is initialized
+/// with a tag derived from the sponge's IO pattern and a protocol-specific
+/// domain string, computed at compile time from N (see the derivation in the
+/// template body). Distinct instantiations - different input length or
+/// protocol - therefore produce unrelated hashes even on identical inputs
+/// (different state sizes T do so already via the permutation).
 /// * N length of the statement `q`
 /// * T Poseidon2 state size used by the sponge (2, 3, 4, 8, 12, or 16)
 template Compression(N, T) {
@@ -32,10 +40,27 @@ template Compression(N, T) {
     signal output beta;
     signal output gamma;
 
-    // This is the ASCII byte sequence "eprint.iacr.org/2025/1500+Pos2" interpreted as a field element.
-    // It consists of the link to the TwoHash paper, without the leading "https://", concatenated with
-    // an identifier for the Poseidon2 hash function.
-    var DS = 0x657072696E742E696163722E6F72672F323032352F313530302B506F7332;
+    assert(N > 0 && N < 2147483648); // N must fit the 31-bit IO length field
+    assert(T >= 2 && T <= 16);
+
+    // Domain separator for the sponge, derived following the SAFE framework
+    // (https://eprint.iacr.org/2023/522): the sponge's IO pattern - one
+    // ABSORB(N) call and one SQUEEZE(1) call, each encoded as a big-endian
+    // 32-bit word with the MSB set for absorb - followed by the domain string
+    // "2025/1500+Pos2" (the TwoHash paper's eprint id and the hash function):
+    //
+    //     DS = 0x80000000+N || 0x00000001 || "2025/1500+Pos2"
+    //
+    // interpreted as a big-endian integer. SAFE hashes this string with
+    // SHA3-256 and truncates the digest to 128 bits before placing it in the
+    // capacity; we skip the hash and pack the bytes directly instead, which is
+    // fine here: at 22 bytes (176 bits) the string fits into a single BN254
+    // field element, so the packing is injective and the capacity IV commits
+    // to N and the protocol just as SAFE's truncated tag would. The state
+    // size T is not encoded, since different T already give different
+    // permutations and thus unrelated hashes.
+    var suffix = 0x323032352F313530302B506F7332; // "2025/1500+Pos2"
+    var DS = ((2147483648 + N) * 4294967296 + 1) * (256 ** 14) + suffix;
 
     beta <== Poseidon2Sponge(N, T)(q, DS);
     gamma <== UHF(N)(alpha, beta, q);

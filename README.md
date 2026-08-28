@@ -31,7 +31,7 @@ Within the library, circuits reference each other by bare filename (e.g. `poseid
 ## Circuits
 
 - `poseidon2.circom`: Poseidon2 permutation over the BN254 scalar field for state sizes t ∈ {2, 3, 4, 8, 12, 16}
-- `compression.circom`: public input compression via [hybrid compression](https://eprint.iacr.org/2025/1500): a Poseidon2-based sponge (`Poseidon2Sponge`, with the domain separator as a runtime signal), a universal hash function (`UHF`), and `Compression` combining both with a fixed domain separator
+- `compression.circom`: public input compression via [hybrid compression](https://eprint.iacr.org/2025/1500): a Poseidon2-based sponge (`Poseidon2Sponge`, with the domain separator as a runtime signal), a universal hash function (`UHF`), and `Compression` combining both with a [SAFE](https://eprint.iacr.org/2023/522)-style domain separator derived at compile time from the sponge instance
 - `mpc.circom`: public entry point for the MPC compiler intrinsics in `precomputations.circom` and `reveal.circom`
 - `precomputations.circom`: `TACEO_PRECOMPUTATION_*` wrappers around Poseidon2 and circomlib primitives (`Num2Bits`, `IsZero`, `AliasCheck`), for MPC-proving
 - `reveal.circom`: `TACEO_REVEAL`, an explicit declassification operation for MPC-proving
@@ -50,6 +50,14 @@ Applications can include `mpc.circom` to access all TACEO MPC compiler intrinsic
 ### Public input compression
 
 `compression.circom` implements the in-circuit side of *hybrid compression* ([Khovratovich, Vladimirov, Wagner: "Data Matching in Unequal Worlds and Applications to Smart Contracts"](https://eprint.iacr.org/2025/1500)). Long statements are expensive as Groth16 public inputs, and hashing them is expensive either on-chain (Poseidon in gas) or in-circuit (Keccak/SHA-256 in constraints). Hybrid compression uses both worlds' cheap hash: the statement `q` moves into the witness, the contract computes `alpha` (Keccak256 of `q`, truncated to the scalar field), the circuit computes `beta` (Poseidon2 sponge of `q`), and both evaluate the universal hash `gamma = UHF(alpha + beta, q)`. The verifier then only checks the proof against the three public inputs `(alpha, beta, gamma)`; soundness reduces to the joint UHF hardness of the two hash functions.
+
+The sponge is domain-separated following the [SAFE framework](https://eprint.iacr.org/2023/522): its capacity element is initialized with a tag encoding the sponge's IO pattern (`ABSORB(N)`, `SQUEEZE(1)` as big-endian 32-bit words, MSB set for absorb) followed by the domain string `"2025/1500+Pos2"`:
+
+```
+DS = 0x80000000+N || 0x00000001 || "2025/1500+Pos2"
+```
+
+interpreted as a big-endian integer. Unlike SAFE, the string is not hashed with SHA3-256 and truncated to 128 bits; at 22 bytes it fits injectively into a single BN254 field element, so packing the bytes directly gives the same guarantee. The tag is computed at compile time inside `Compression`, so distinct instantiations (different input length `N` or protocol) produce unrelated hashes even on identical inputs. The state size `T` is not encoded in the tag, since different `T` already give different permutations and thus unrelated hashes.
 
 ## Tests
 
