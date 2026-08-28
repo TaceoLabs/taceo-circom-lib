@@ -29,9 +29,6 @@ KATS_PER_FILE = 2
 SEED = 0x7ACE0
 # Domain separator used by the historical poseidon2_sponge_t* KATs.
 DS = 1
-# Compile-time domain separator hardcoded into the Compression template
-# ("eprint.iacr.org/2025/1500+Pos2" interpreted as a field element)
-COMPRESSION_DS = 0x657072696E742E696163722E6F72672F323032352F313530302B506F7332
 UHF_N = 4
 MERKLE_MAX_DEPTH = 10
 MERKLE_DEPTHS = [0, 1, 5, 10]
@@ -151,6 +148,15 @@ def poseidon2(state, consts):
 
 # --- sponge and UHF (mirror circuits/compression.circom) ----------------------
 
+def compression_ds(n):
+    """SAFE-style domain separator computed at compile time by the Compression
+    template: IO pattern ABSORB(n) || SQUEEZE(1) as big-endian 32-bit words
+    (MSB set for absorb), followed by the domain string "2025/1500+Pos2",
+    packed directly into a field element instead of SAFE's hash-and-truncate."""
+    io = (0x80000000 | n).to_bytes(4, "big") + (1).to_bytes(4, "big")
+    return int.from_bytes(io + b"2025/1500+Pos2", "big")
+
+
 def poseidon2_sponge(inputs, t, ds, consts):
     state = [0] * (t - 1) + [ds % P]
     n = len(inputs)
@@ -263,7 +269,7 @@ def main():
 
             q = [fe(current_rng) for _ in range(n)]
             alpha = fe(current_rng)
-            beta = poseidon2_sponge(q, t, COMPRESSION_DS, consts[t])
+            beta = poseidon2_sponge(q, t, compression_ds(n), consts[t])
             comp_kats.append(
                 {
                     "q": [hexstr(x) for x in q],
