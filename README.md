@@ -31,7 +31,7 @@ Within the library, circuits reference each other by bare filename (e.g. `poseid
 ## Circuits
 
 - `poseidon2.circom`: Poseidon2 permutation over the BN254 scalar field for state sizes t ∈ {2, 3, 4, 8, 12, 16}
-- `compression.circom`: public input compression via [hybrid compression](https://eprint.iacr.org/2025/1500): a Poseidon2-based sponge (`Poseidon2Sponge`, with the domain separator as a runtime signal), a universal hash function (`UHF`), and `Compression` combining both with a [SAFE](https://eprint.iacr.org/2023/522)-style domain separator derived at compile time from the sponge instance
+- `compression.circom`: public input compression via [hybrid compression](https://eprint.iacr.org/2025/1500): a Poseidon2-based sponge (`Poseidon2Sponge`, with the domain separator as a runtime signal), a universal hash function (`UHF`), and `Compression` combining both with a [SAFE](https://eprint.iacr.org/2023/522)-style domain separator derived at compile time from the sponge instance. `Poseidon2SpongeWithPrecomputation` and `CompressionWithPrecomputation` provide equivalent TACEO MPC-precomputation variants
 - `mpc.circom`: public entry point for the MPC compiler intrinsics in `precomputations.circom` and `reveal.circom`
 - `precomputations.circom`: `TACEO_PRECOMPUTATION_*` wrappers around Poseidon2 and circomlib primitives (`Num2Bits`, `IsZero`, `AliasCheck`), for MPC-proving
 - `reveal.circom`: `TACEO_REVEAL`, an explicit declassification operation for MPC-proving
@@ -44,6 +44,8 @@ The `poseidon2`, `eddsa_poseidon2`, and `babyjubjub` circuits are pulled from th
 ### MPC-proving
 
 Applications can include `mpc.circom` to access all TACEO MPC compiler intrinsics. `precomputations.circom` provides the `TACEO_PRECOMPUTATION_*` runtime wrappers around Poseidon2 and circomlib primitives (`Num2Bits`, `IsZero`, `AliasCheck`).
+
+`Poseidon2Sponge` and `Compression` use the ordinary Poseidon2 permutation. Use `Poseidon2SpongeWithPrecomputation` or `CompressionWithPrecomputation` when their Poseidon2 permutations should be marked as TACEO precomputations for MPC proving; their signal interfaces and outputs are identical to the ordinary variants.
 
 `TACEO_REVEAL(n)` is an identity operation in standard Circom and explicitly declassifies its inputs to every MPC party when compiled by the TACEO MPC compiler. Every reveal site is therefore a security-sensitive circuit-authoring decision.
 

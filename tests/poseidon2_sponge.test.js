@@ -30,7 +30,10 @@ describe("Poseidon2Sponge kats", function () {
             { in: kat.in.map(BigInt), ds: 1n },
             true,
           );
-          await circuit.assertOut(witness, { out: BigInt(kat.out) });
+          await circuit.assertOut(witness, {
+            out: BigInt(kat.out),
+            outWithPrecomputation: BigInt(kat.out),
+          });
           await circuit.checkConstraints(witness);
         });
       });

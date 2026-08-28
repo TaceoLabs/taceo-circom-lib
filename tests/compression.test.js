@@ -33,6 +33,8 @@ describe("Compression kats", function () {
           await circuit.assertOut(witness, {
             beta: BigInt(kat.beta),
             gamma: BigInt(kat.gamma),
+            betaWithPrecomputation: BigInt(kat.beta),
+            gammaWithPrecomputation: BigInt(kat.gamma),
           });
           await circuit.checkConstraints(witness);
         });

@@ -1,5 +1,5 @@
 pragma circom 2.2.2;
 
-include "compression.circom";
+include "compression_variants.circom";
 
-component main = Compression(3, 3);
+component main = CompressionVariants(3, 3);

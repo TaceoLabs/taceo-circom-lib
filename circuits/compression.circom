@@ -40,8 +40,38 @@ template Compression(N, T) {
     signal output beta;
     signal output gamma;
 
+    component compression = CompressionInternal(N, T, 0);
+    compression.q <== q;
+    compression.alpha <== alpha;
+    beta <== compression.beta;
+    gamma <== compression.gamma;
+}
+
+/// Precomputation-enabled variant of `Compression`. Its interface and outputs are
+/// identical to `Compression`, but each Poseidon2 permutation is marked as a
+/// TACEO precomputation for MPC proving.
+template CompressionWithPrecomputation(N, T) {
+    signal input q[N];
+    signal input alpha;
+    signal output beta;
+    signal output gamma;
+
+    component compression = CompressionInternal(N, T, 1);
+    compression.q <== q;
+    compression.alpha <== alpha;
+    beta <== compression.beta;
+    gamma <== compression.gamma;
+}
+
+template CompressionInternal(N, T, PRECOMPUTATION) {
+    signal input q[N];
+    signal input alpha;
+    signal output beta;
+    signal output gamma;
+
     assert(N > 0 && N < 2147483648); // N must fit the 31-bit IO length field
     assert(T >= 2 && T <= 16);
+    assert(PRECOMPUTATION <= 1);
 
     // Domain separator for the sponge, derived following the SAFE framework
     // (https://eprint.iacr.org/2023/522): the sponge's IO pattern - one
@@ -62,7 +92,11 @@ template Compression(N, T) {
     var suffix = 0x323032352F313530302B506F7332; // "2025/1500+Pos2"
     var DS = ((2147483648 + N) * 4294967296 + 1) * (256 ** 14) + suffix;
 
-    beta <== Poseidon2Sponge(N, T)(q, DS);
+    if (PRECOMPUTATION == 1) {
+        beta <== Poseidon2SpongeWithPrecomputation(N, T)(q, DS);
+    } else {
+        beta <== Poseidon2Sponge(N, T)(q, DS);
+    }
     gamma <== UHF(N)(alpha, beta, q);
 }
 
@@ -97,8 +131,28 @@ template Poseidon2Sponge(N, T) {
     signal input ds;
     signal output out;
 
+    out <== Poseidon2SpongeInternal(N, T, 0)(in, ds);
+}
+
+/// Precomputation-enabled variant of `Poseidon2Sponge`. Its interface and output
+/// are identical to `Poseidon2Sponge`, but each permutation is marked as a TACEO
+/// precomputation for MPC proving.
+template Poseidon2SpongeWithPrecomputation(N, T) {
+    signal input in[N];
+    signal input ds;
+    signal output out;
+
+    out <== Poseidon2SpongeInternal(N, T, 1)(in, ds);
+}
+
+template Poseidon2SpongeInternal(N, T, PRECOMPUTATION) {
+    signal input in[N];
+    signal input ds;
+    signal output out;
+
     assert(T >= 2);
     assert(N >= 1);
+    assert(PRECOMPUTATION <= 1);
 
     var permutations = (N + T - 2) \ (T-1);
     var states[permutations + 1][T];
@@ -118,7 +172,11 @@ template Poseidon2Sponge(N, T) {
             states[p][i] = states[p][i] + in[absorbed + i];
         }
         absorbed += remaining;
-        states[p + 1] = TACEO_PRECOMPUTATION_Poseidon2(T)(states[p]);
+        if (PRECOMPUTATION == 1) {
+            states[p + 1] = TACEO_PRECOMPUTATION_Poseidon2(T)(states[p]);
+        } else {
+            states[p + 1] = Poseidon2(T)(states[p]);
+        }
     }
     out <== states[permutations][0];
 }
